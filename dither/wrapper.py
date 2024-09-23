@@ -1,4 +1,5 @@
 import numpy as np
+import sys, os
 from importlib import reload
 
 from . import legacy
@@ -36,9 +37,13 @@ def ifft(data_hat):
     # plt.colorbar()
     return data
 
-def phase_shift(A, offsets, n):
+def phase_shift(A, offsets, n, verbose=True):
     DR = 0
     DC = 0
     shift = False
+    if not verbose: 
+        sys.stdout = open(os.devnull, 'w')
     Aphased = legacy.phase(A, NR_FREQ, NC_FREQ, shift, DR, DC, offsets, n)
+    if not verbose: 
+        sys.stdout = sys.__stdout__
     return Aphased

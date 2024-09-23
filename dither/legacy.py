@@ -334,7 +334,7 @@ def phase(A_in, nrow, ncol, shift, DR, DC, offsets, npos):
 def four1(data, nn, isign):
     # print('four1', data.size, nn, data)
     n = 2*nn
-    data = np.asarray(data, dtype=np.float64)
+    data = data.copy()
     # data = np.concatenate((data, np.zeros(10)))
     j = 1
     for i in range(1, n+1, 2):
@@ -378,7 +378,7 @@ def four1(data, nn, isign):
 def realft(data, n, isign):
     # print('realft', data.size, n)
     theta = 2*np.pi/(2*n)
-    data = np.asarray(data, dtype=np.float64)
+    data = data.copy()
     wr = 1.0
     wi = 0.0
     c1 = 0.5
@@ -418,8 +418,8 @@ def realft(data, n, isign):
     return data
 
 def real2dfft(a, nra, nca, b, nrb, ncb, isign, work, onedim=False):
-    a = np.asarray(a, dtype=np.float64)
-    b = np.asarray(b, dtype=np.float64)
+    a = a.copy()
+    b = b.copy()
     work = np.zeros((2, max(nra, nrb)))
     if isign >= 0:
         # print(a.shape, b.shape, nrb, ncb, a[:6, :nrb].shape)
