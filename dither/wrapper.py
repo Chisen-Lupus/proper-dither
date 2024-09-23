@@ -1,4 +1,5 @@
 import numpy as np
+from importlib import reload
 
 from . import legacy
 
@@ -6,8 +7,10 @@ NC_FREQ = 514 # must be 2**N + 2
 NR_FREQ = 512 # must be 2**N
 NC_SPAT = NC_FREQ
 NR_SPAT = NR_FREQ # must be 2**N
-
 NSUB = legacy.NSUB
+
+# for testing purpose
+reload(legacy)
 
 def fft(data): 
     b = np.zeros((NC_SPAT, NR_SPAT))
