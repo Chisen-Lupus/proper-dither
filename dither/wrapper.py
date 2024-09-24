@@ -53,8 +53,10 @@ def phase_shift(A, offsets, n, verbose=True):
     DC = 0
     shift = False
     if not verbose: 
+        stdout_backup = sys.stdout
         sys.stdout = open(os.devnull, 'w')
-    Aphased = legacy.phase(A, NR_FREQ, NC_FREQ, shift, DR, DC, offsets, n)
-    if not verbose: 
-        sys.stdout = sys.__stdout__
+        Aphased = legacy.phase(A, NR_FREQ, NC_FREQ, shift, DR, DC, offsets, n)
+        sys.stdout = stdout_backup
+    else: 
+        Aphased = legacy.phase(A, NR_FREQ, NC_FREQ, shift, DR, DC, offsets, n)
     return Aphased
