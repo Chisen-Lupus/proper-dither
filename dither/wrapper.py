@@ -13,6 +13,17 @@ NSUB = legacy.NSUB
 # for testing purpose
 reload(legacy)
 
+def set_padding_size(NC, NR):
+    global NC_FREQ, NR_FREQ, NC_SPAT, NR_SPAT
+    NC_FREQ = NC
+    NR_FREQ = NR
+    NC_SPAT = NC_FREQ
+    NR_SPAT = NR_FREQ
+
+def set_dither_size(factor):
+    global NSUB
+    NSUB = factor
+
 def fft(data): 
     b = np.zeros((NC_SPAT, NR_SPAT))
     b[:data.shape[0], :data.shape[1]] = data
