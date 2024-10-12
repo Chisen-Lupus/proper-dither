@@ -309,8 +309,12 @@ def phase_shift(A, offsets, n, verbose=False):
     if not verbose: 
         stdout_backup = sys.stdout
         sys.stdout = open(os.devnull, 'w')
-        Aphased = phase_updated(A, offsets, n)
-        sys.stdout = stdout_backup
+        try: 
+            Aphased = phase_updated(A, offsets, n)
+        except Exception as e: 
+            print(repr(e))
+        finally:
+            sys.stdout = stdout_backup
     else: 
         Aphased = phase_updated(A, offsets, n)
     return Aphased

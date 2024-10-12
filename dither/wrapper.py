@@ -55,8 +55,12 @@ def phase_shift(A, offsets, n, verbose=True):
     if not verbose: 
         stdout_backup = sys.stdout
         sys.stdout = open(os.devnull, 'w')
-        Aphased = legacy.phase(A, NR_FREQ, NC_FREQ, shift, DR, DC, offsets, n)
-        sys.stdout = stdout_backup
+        try: 
+            Aphased = legacy.phase(A, NR_FREQ, NC_FREQ, shift, DR, DC, offsets, n)
+        except Exception as e: 
+            print(repr(e))
+        finally:
+            sys.stdout = stdout_backup
     else: 
         Aphased = legacy.phase(A, NR_FREQ, NC_FREQ, shift, DR, DC, offsets, n)
     return Aphased
