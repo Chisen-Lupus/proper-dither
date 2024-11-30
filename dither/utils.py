@@ -182,3 +182,46 @@ def get_cosmic_ray_mask_without_AGN(image_data, kernel_size=3, sigma_threshold=5
             cosmic_ray_mask[labeled_array == label_num] = False
     
     return cosmic_ray_mask
+
+def extract_central_region(image, fraction=0.1, radius=None, center=None):
+    # Determine the shape and center of the image
+    image_shape = np.array(image.shape)
+    if center is None:
+        center = image_shape // 2
+    center_x, center_y = int(center[0]), int(center[1])
+
+    # Determine the half-widths based on radius or fraction
+    if radius is not None:
+        half_width_x, half_width_y = int(radius), int(radius)
+    else:
+        half_width_x, half_width_y = (image_shape * fraction // 2).astype(int)
+
+    # Define the slice ranges, padding with NaN if needed
+    start_x, end_x = center_x - half_width_x, center_x + half_width_x + 1
+    start_y, end_y = center_y - half_width_y, center_y + half_width_y + 1
+
+    # Initialize the output array filled with NaN
+    output_shape = (2 * half_width_x + 1, 2 * half_width_y + 1)
+    cutout = np.full(output_shape, np.nan, dtype=image.dtype)
+
+    # Determine the intersection between the image and the cutout
+    src_start_x = max(0, start_x)
+    src_end_x = min(image.shape[0], end_x)
+    src_start_y = max(0, start_y)
+    src_end_y = min(image.shape[1], end_y)
+
+    dest_start_x = max(0, -start_x)
+    dest_end_x = dest_start_x + (src_end_x - src_start_x)
+    dest_start_y = max(0, -start_y)
+    dest_end_y = dest_start_y + (src_end_y - src_start_y)
+
+    # Copy the valid region of the image into the cutout
+    cutout[
+        dest_start_x:dest_end_x,
+        dest_start_y:dest_end_y
+    ] = image[
+        src_start_x:src_end_x,
+        src_start_y:src_end_y
+    ]
+
+    return cutout
