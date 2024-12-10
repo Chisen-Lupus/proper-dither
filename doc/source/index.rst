@@ -17,7 +17,7 @@ Contents:
    tutorial
    dither
    api
-
+   modules
 Indices and tables
 ==================
 
