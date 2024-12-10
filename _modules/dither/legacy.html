@@ -1,0 +1,581 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>dither.legacy &mdash; Proper Dither 0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=2709fde1"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Proper Dither
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dither.html">dither package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Proper Dither</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">dither.legacy</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for dither.legacy</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="n">PI</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span>
+<span class="n">RADIOAN</span> <span class="o">=</span> <span class="n">PI</span><span class="o">/</span><span class="mi">180</span>
+<span class="n">NSTMAX</span> <span class="o">=</span> <span class="mi">140</span>
+<span class="n">NDIV</span> <span class="o">=</span> <span class="mi">3</span>
+
+<span class="n">NSUB</span> <span class="o">=</span> <span class="mi">2</span>
+
+<span class="c1"># TODO: change the comments</span>
+<span class="c1"># TODO: add well docmentation like the original files</span>
+
+<div class="viewcode-block" id="phase">
+<a class="viewcode-back" href="../../dither.html#dither.legacy.phase">[docs]</a>
+<span class="k">def</span> <span class="nf">phase</span><span class="p">(</span><span class="n">A_in</span><span class="p">,</span> <span class="n">nrow</span><span class="p">,</span> <span class="n">ncol</span><span class="p">,</span> <span class="n">shift</span><span class="p">,</span> <span class="n">DR</span><span class="p">,</span> <span class="n">DC</span><span class="p">,</span> <span class="n">offsets</span><span class="p">,</span> <span class="n">npos</span><span class="p">):</span>
+    <span class="c1"># TODO: check if they are all in use</span>
+    <span class="n">A</span> <span class="o">=</span> <span class="n">A_in</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">phix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">NSTMAX</span><span class="p">)</span>
+    <span class="c1"># spr, spi, rpr, rpi, cpr, cpi, ypr, ypi, tpr, tpi = 0</span>
+    <span class="c1"># fr, fi = 0</span>
+    <span class="n">phasem</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">NDIV</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">NDIV</span><span class="o">**</span><span class="mi">2</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">complex128</span><span class="p">)</span>
+    <span class="n">vec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">NDIV</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">NDIV</span><span class="o">**</span><span class="mi">2</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">complex128</span><span class="p">)</span>
+    <span class="n">coef</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">NDIV</span><span class="o">**</span><span class="mi">2</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">complex128</span><span class="p">)</span>
+    <span class="n">phases</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">NDIV</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">NSTMAX</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">complex128</span><span class="p">)</span>
+    <span class="c1"># row, col, vrow = 0</span>
+    <span class="n">key</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">NDIV</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+
+    <span class="c1"># LINE 165</span>
+    
+    <span class="k">if</span> <span class="n">shift</span><span class="p">:</span> 
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">nrow</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span> 
+            <span class="c1"># U = 0</span>
+            <span class="k">if</span> <span class="n">row</span><span class="o">&lt;=</span><span class="n">nrow</span><span class="o">//</span><span class="mi">2</span><span class="p">:</span> 
+                <span class="n">U</span> <span class="o">=</span> <span class="n">row</span><span class="o">/</span><span class="n">nrow</span>
+            <span class="k">else</span><span class="p">:</span> 
+                <span class="n">U</span> <span class="o">=</span> <span class="p">(</span><span class="n">row</span> <span class="o">-</span> <span class="n">nrow</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="n">nrow</span>
+            <span class="n">rphase</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">PI</span><span class="o">*</span><span class="n">DR</span><span class="o">*</span><span class="n">U</span>
+            <span class="n">rpr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">rphase</span><span class="p">)</span>
+            <span class="n">rpi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">rphase</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">ncol</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">):</span>
+                <span class="n">V</span> <span class="o">=</span> <span class="p">(</span><span class="n">col</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="n">ncol</span><span class="o">/</span><span class="mi">2</span>
+                <span class="n">cphase</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">PI</span><span class="o">*</span><span class="n">DC</span><span class="o">*</span><span class="n">V</span>
+                <span class="n">cpr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">cphase</span><span class="p">)</span>
+                <span class="n">cpi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">cphase</span><span class="p">)</span>
+                <span class="n">fr</span> <span class="o">=</span> <span class="n">A</span><span class="p">[</span><span class="n">col</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">row</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">fi</span> <span class="o">=</span> <span class="n">A</span><span class="p">[</span><span class="n">col</span><span class="o">+</span><span class="mi">1</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">row</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">tpr</span> <span class="o">=</span> <span class="n">rpr</span><span class="o">*</span><span class="n">cpr</span> <span class="o">-</span> <span class="n">rpi</span><span class="o">*</span><span class="n">cpi</span>
+                <span class="n">tpi</span> <span class="o">=</span> <span class="n">rpi</span><span class="o">*</span><span class="n">cpr</span> <span class="o">+</span> <span class="n">rpr</span><span class="o">*</span><span class="n">cpi</span>
+                <span class="c1"># print(tpr, tpi)</span>
+                <span class="c1"># print(rphase, cphase, row)</span>
+                <span class="n">A</span><span class="p">[</span><span class="n">col</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">row</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">fr</span><span class="o">*</span><span class="n">tpr</span> <span class="o">-</span> <span class="n">fi</span><span class="o">*</span><span class="n">tpi</span>
+                <span class="n">A</span><span class="p">[</span><span class="n">col</span><span class="o">+</span><span class="mi">1</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">row</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">fi</span><span class="o">*</span><span class="n">tpr</span> <span class="o">+</span> <span class="n">fr</span><span class="o">*</span><span class="n">tpi</span>
+                <span class="c1"># print(A[col, row] - A_in[col, row])</span>
+                <span class="c1"># print(A[col+1, row] - A_in[col+1, row])</span>
+        <span class="k">return</span> <span class="n">A</span>
+    
+    <span class="c1"># LINE 247 - read offsets (totally different from the original code)</span>
+
+    <span class="n">offsets</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">offsets</span><span class="p">)</span>
+    <span class="n">xcr</span> <span class="o">=</span> <span class="n">offsets</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="n">ycr</span> <span class="o">=</span> <span class="n">offsets</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+    <span class="n">dx</span> <span class="o">=</span> <span class="n">offsets</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">xcr</span>
+    <span class="n">dy</span> <span class="o">=</span> <span class="n">offsets</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">ycr</span>
+    <span class="n">phix</span> <span class="o">=</span> <span class="n">NSUB</span><span class="o">*</span><span class="n">PI</span><span class="o">*</span><span class="n">dx</span>
+    <span class="n">phiy</span> <span class="o">=</span> <span class="n">NSUB</span><span class="o">*</span><span class="n">PI</span><span class="o">*</span><span class="n">dy</span>
+    <span class="n">wt</span> <span class="o">=</span> <span class="n">offsets</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span>
+    <span class="n">npp</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">offsets</span><span class="p">)</span>
+
+    <span class="c1"># LINE 289 - Calculate the coefficients for each image. </span>
+
+    <span class="n">nsy</span> <span class="o">=</span> <span class="n">NSUB</span> <span class="c1"># 2</span>
+    <span class="n">nsx</span> <span class="o">=</span> <span class="p">(</span><span class="n">NSUB</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span><span class="o">//</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">1</span> <span class="c1"># 1</span>
+    <span class="n">isy</span> <span class="o">=</span> <span class="o">-</span><span class="p">((</span><span class="n">NSUB</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">//</span><span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span> <span class="c1"># 0, NOTE: added a bracket to regulate different handling of integer division</span>
+    <span class="n">isy</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">isec</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">for</span> <span class="n">iy</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">isy</span><span class="p">,</span> <span class="n">isy</span><span class="o">+</span><span class="n">nsy</span><span class="p">):</span> 
+        <span class="k">for</span> <span class="n">ix</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">nsx</span><span class="p">):</span> 
+
+            <span class="n">isec</span> <span class="o">+=</span> <span class="mi">1</span>
+
+            <span class="c1"># LINE 304</span>
+
+            <span class="k">for</span> <span class="n">nim</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">npp</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+                <span class="n">px</span> <span class="o">=</span> <span class="o">-</span><span class="n">phix</span><span class="p">[</span><span class="n">nim</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="mi">2</span><span class="o">/</span><span class="n">NSUB</span>
+                <span class="n">py</span> <span class="o">=</span> <span class="o">-</span><span class="n">phiy</span><span class="p">[</span><span class="n">nim</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="mi">2</span><span class="o">/</span><span class="n">NSUB</span>
+                <span class="n">nuin</span> <span class="o">=</span> <span class="n">ix</span> <span class="o">-</span> <span class="p">(</span><span class="n">NSUB</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span><span class="o">//</span><span class="mi">2</span>
+                <span class="n">nvin</span> <span class="o">=</span> <span class="n">iy</span>
+                <span class="n">pxi</span> <span class="o">=</span> <span class="n">nuin</span><span class="o">*</span><span class="n">px</span>
+                <span class="n">pyi</span> <span class="o">=</span> <span class="o">-</span><span class="n">nvin</span><span class="o">*</span><span class="n">py</span>
+                <span class="c1"># print(&#39;pxi&#39;, pxi, &#39;pyi&#39;, pyi)</span>
+
+                <span class="n">isat</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="k">for</span> <span class="n">isaty</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">NSUB</span><span class="p">):</span>
+                    <span class="k">for</span> <span class="n">isatx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">NSUB</span><span class="p">):</span> 
+                        <span class="n">isat</span> <span class="o">+=</span> <span class="mi">1</span>
+                        <span class="n">phit</span> <span class="o">=</span> <span class="n">isatx</span><span class="o">*</span><span class="n">px</span> <span class="o">+</span> <span class="n">pxi</span> <span class="o">+</span> <span class="n">isaty</span><span class="o">*</span><span class="n">py</span> <span class="o">+</span> <span class="n">pyi</span>
+                        <span class="c1"># print(isat-1, nim-1, phit)</span>
+                        <span class="n">phases</span><span class="p">[</span><span class="n">isat</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">nim</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">phit</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">phit</span><span class="p">)</span><span class="o">*</span><span class="mi">1</span><span class="n">j</span><span class="p">)</span><span class="o">/</span><span class="n">NSUB</span><span class="o">**</span><span class="mi">2</span>
+                    <span class="c1">#     break</span>
+                    <span class="c1"># break</span>
+
+                <span class="c1"># LINE 344 - Pivot if required so that the fundamental is always in column 1</span>
+
+                <span class="n">nfund</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">NSUB</span><span class="o">*</span><span class="n">nvin</span> <span class="o">-</span> <span class="n">nuin</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Fundamental&#39;</span><span class="p">,</span> <span class="n">nfund</span><span class="p">)</span>
+                <span class="n">temp</span> <span class="o">=</span> <span class="n">phases</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">nim</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="c1"># print(nfund, nim, nvin, nuin)</span>
+                <span class="n">phases</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">nim</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">phases</span><span class="p">[</span><span class="n">nfund</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">nim</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">phases</span><span class="p">[</span><span class="n">nfund</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">nim</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">temp</span>
+
+            <span class="c1"># print(iy, ix, phases[:4, :4].real)</span>
+            <span class="c1"># vec[:4, :4] = la.inv(phases[:4, :4])</span>
+            <span class="c1"># print(vec.shape, phases.shape)</span>
+            <span class="c1"># plt.imshow(phases[:9, :9].real)</span>
+
+            <span class="c1"># LINE 355 - This loads an identity matrix, which will be used to invert the phase matrix.</span>
+            
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">NSUB</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span> 
+                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">NSUB</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+                    <span class="n">vec</span><span class="p">[</span><span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="o">+</span><span class="mi">0</span><span class="n">j</span>
+                <span class="n">vec</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span><span class="o">+</span><span class="mi">0</span><span class="n">j</span>
+                <span class="n">key</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span>
+            
+            <span class="c1"># vec[:4, :4] = la.inv(phases[:4, :4])</span>
+
+            <span class="c1">### BEGIN MATRIX INVERSION</span>
+
+            <span class="c1"># LINE 367 - If N&gt;nsub2, then the problem is over determined</span>
+
+            <span class="c1"># LINE 371 - The weighting factor is used at this point.</span>
+
+            <span class="k">if</span> <span class="n">npp</span><span class="o">&gt;</span><span class="n">NSUB</span><span class="o">**</span><span class="mi">2</span><span class="p">:</span> 
+                <span class="c1"># print(&#39;npp&gt;NSUB**2&#39;)</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">NSUB</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span> 
+                    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">NSUB</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span> 
+                        <span class="n">phasem</span><span class="p">[</span><span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="o">+</span><span class="mi">0</span><span class="n">j</span>
+                        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">npp</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span> 
+                            <span class="n">phasem</span><span class="p">[</span><span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">conj</span><span class="p">(</span><span class="n">phases</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">k</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span><span class="o">*</span><span class="n">wt</span><span class="p">[</span><span class="n">k</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">phases</span><span class="p">[</span><span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">k</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span> 
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">NSUB</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span> 
+                    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">NSUB</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span> 
+                        <span class="n">phasem</span><span class="p">[</span><span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">phases</span><span class="p">[</span><span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="c1"># print(phasem==0)</span>
+            <span class="c1"># print(phasem.shape, phases.shape, vec.shape)</span>
+
+            <span class="c1"># LINE 391 - solve for the data vector phases</span>
+
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">NSUB</span><span class="o">**</span><span class="mi">2</span><span class="o">-</span><span class="mi">1</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span> 
+                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">NSUB</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span> 
+
+                    <span class="c1"># LINE 396 - Check for zero division and pivot if required.</span>
+
+                    <span class="c1"># print(phasem)#, la.inv(phasem))</span>
+                    <span class="c1"># print(i, phasem[i, i]*np.conj(phasem[i, i])==0)</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="n">phasem</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">conj</span><span class="p">(</span><span class="n">phasem</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span><span class="o">==</span><span class="mi">0</span><span class="p">):</span> 
+                        <span class="n">pivot</span> <span class="o">=</span> <span class="kc">False</span>
+                        <span class="n">k</span> <span class="o">=</span> <span class="n">i</span><span class="o">+</span><span class="mi">1</span>
+                        <span class="k">while</span> <span class="p">(</span><span class="ow">not</span> <span class="n">pivot</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">k</span><span class="o">&lt;=</span><span class="n">NSUB</span><span class="o">**</span><span class="mi">2</span><span class="p">):</span> 
+                            <span class="k">if</span> <span class="p">(</span><span class="n">phasem</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">k</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">conj</span><span class="p">(</span><span class="n">phasem</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">k</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span><span class="o">!=</span><span class="mi">0</span><span class="p">):</span> 
+                                
+                                <span class="n">pivot</span> <span class="o">=</span> <span class="kc">True</span>
+                                <span class="n">itemp</span> <span class="o">=</span> <span class="n">key</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                                <span class="n">key</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">key</span><span class="p">[</span><span class="n">k</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                                <span class="n">key</span><span class="p">[</span><span class="n">k</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">itemp</span>
+                                <span class="k">for</span> <span class="n">kk</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">NSUB</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span> 
+                                    <span class="n">temp</span> <span class="o">=</span> <span class="n">phasem</span><span class="p">[</span><span class="n">kk</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                                    <span class="n">phasem</span><span class="p">[</span><span class="n">kk</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">phasem</span><span class="p">[</span><span class="n">kk</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">k</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                                    <span class="n">phasem</span><span class="p">[</span><span class="n">kk</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">k</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">temp</span>
+                                    <span class="n">temp</span> <span class="o">=</span> <span class="n">vec</span><span class="p">[</span><span class="n">kk</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                                    <span class="n">vec</span><span class="p">[</span><span class="n">kk</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">vec</span><span class="p">[</span><span class="n">kk</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">k</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                                    <span class="n">vec</span><span class="p">[</span><span class="n">kk</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">k</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">temp</span>
+                            <span class="k">else</span><span class="p">:</span> 
+                                <span class="n">k</span> <span class="o">+=</span> <span class="mi">1</span>
+
+                        <span class="k">if</span> <span class="ow">not</span> <span class="n">pivot</span><span class="p">:</span> 
+                            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;singular phase matrix&#39;</span><span class="p">)</span>
+                    
+                    <span class="c1"># if phasem[i-1, i-1]==0: return</span>
+
+                    <span class="c1"># LINE 436 - Any pivoting required is now completed</span>
+
+                    <span class="c1"># print(i, j, &#39;phasem&#39;, phasem[i-1, i-1])</span>
+                    <span class="c1"># print(phasem[:4, :4])</span>
+                    <span class="n">rat</span> <span class="o">=</span> <span class="n">phasem</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">/</span><span class="n">phasem</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">NSUB</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span> 
+                        <span class="n">phasem</span><span class="p">[</span><span class="n">k</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-=</span> <span class="n">rat</span><span class="o">*</span><span class="n">phasem</span><span class="p">[</span><span class="n">k</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">NSUB</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span> 
+                        <span class="n">vec</span><span class="p">[</span><span class="n">k</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-=</span> <span class="n">rat</span><span class="o">*</span><span class="n">vec</span><span class="p">[</span><span class="n">k</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="c1"># print(i, phasem[i, i])</span>
+                    <span class="c1"># print(phasem)</span>
+                <span class="c1"># return</span>
+            
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">NSUB</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                <span class="n">rat</span> <span class="o">=</span> <span class="n">phasem</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">NSUB</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+                    <span class="c1"># print(&#39;rat&#39;, rat, i, phasem[i-1, i-1])</span>
+                    <span class="c1"># print(phasem)</span>
+                    <span class="c1"># print(phases[:4, :4]==0)</span>
+                    <span class="n">vec</span><span class="p">[</span><span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">/=</span> <span class="n">rat</span>
+                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                    <span class="n">rat</span> <span class="o">=</span> <span class="n">phasem</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">NSUB</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+                        <span class="n">vec</span><span class="p">[</span><span class="n">k</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-=</span> <span class="n">rat</span><span class="o">*</span><span class="n">vec</span><span class="p">[</span><span class="n">k</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">NSUB</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+                <span class="n">vec</span><span class="p">[</span><span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">/=</span> <span class="n">phasem</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+
+            <span class="c1"># LINE 467 - The vec array now holds the inverse of the original phasem array.</span>
+
+            <span class="c1">### END MATRIX INVERSION</span>
+
+            <span class="c1"># LINE 469 - If any pivoting has been done, undo it.</span>
+
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">NSUB</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">key</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">!=</span><span class="n">i</span><span class="p">:</span> 
+                    <span class="n">k</span> <span class="o">=</span> <span class="n">i</span><span class="o">+</span><span class="mi">1</span>
+                    <span class="c1"># print(key)</span>
+                    <span class="k">while</span> <span class="p">(</span><span class="n">key</span><span class="p">[</span><span class="n">k</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">!=</span><span class="n">i</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">k</span><span class="o">&lt;</span><span class="n">NSUB</span><span class="o">**</span><span class="mi">2</span><span class="p">):</span> 
+                        <span class="n">k</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="k">for</span> <span class="n">kk</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">NSUB</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+                        <span class="n">temp</span> <span class="o">=</span> <span class="n">vec</span><span class="p">[</span><span class="n">kk</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                        <span class="n">vec</span><span class="p">[</span><span class="n">kk</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">vec</span><span class="p">[</span><span class="n">kk</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">k</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                        <span class="n">vec</span><span class="p">[</span><span class="n">kk</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">k</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">temp</span>
+                    <span class="n">key</span><span class="p">[</span><span class="n">k</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">key</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+            <span class="c1"># # LINE 490 - For NSUB2 images, we are done</span>
+            
+            <span class="k">if</span> <span class="n">npp</span><span class="o">==</span><span class="n">NSUB</span><span class="o">**</span><span class="mi">2</span><span class="p">:</span>
+                <span class="c1"># print(&#39;npp==NSUB**2&#39;)</span>
+                <span class="c1"># print(&#39;coef&#39;, coef)</span>
+                <span class="c1"># print(&#39;vec&#39;, vec[:, 0], npos-1)</span>
+                <span class="n">coef</span><span class="p">[</span><span class="n">isec</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">vec</span><span class="p">[</span><span class="n">npos</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+
+            <span class="c1"># LINE 495 - Otherwise, we need to do a little more work.  Here we just solve for the fundamental image.</span>
+            
+            <span class="k">else</span><span class="p">:</span> 
+                <span class="c1"># print(&#39;npp!=NSUB**2&#39;)</span>
+                <span class="n">coef</span><span class="p">[</span><span class="n">isec</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">NSUB</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+                    <span class="n">coef</span><span class="p">[</span><span class="n">isec</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="n">vec</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">conj</span><span class="p">(</span><span class="n">phases</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">npos</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+            <span class="c1"># print(isec, npos, coef[isec], coef)</span>
+
+            <span class="c1"># LINE 505 - Addin weighting factor</span>
+
+            <span class="n">coef</span><span class="p">[</span><span class="n">isec</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*=</span> <span class="n">wt</span><span class="p">[</span><span class="n">npos</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+            <span class="c1"># print(f&#39;Image {npos}, power {coef[isec-1]*np.conj(coef[isec-1])}, sector {isec}&#39;)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Image </span><span class="si">{</span><span class="n">npos</span><span class="si">}</span><span class="s1">, power </span><span class="si">{</span><span class="n">coef</span><span class="p">[</span><span class="n">isec</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s1">, sector </span><span class="si">{</span><span class="n">isec</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="c1">#     break</span>
+        <span class="c1"># break</span>
+
+    <span class="c1"># print(&#39;coef&#39;, coef)</span>
+    <span class="c1"># COEFS.append(coef)</span>
+
+    <span class="c1"># LINE 516 - apply the complex scale factor to the transform</span>
+
+    <span class="n">isec</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">isv</span> <span class="o">=</span> <span class="n">nrow</span><span class="o">//</span><span class="mi">2</span>
+    <span class="n">iev</span> <span class="o">=</span> <span class="n">isv</span> <span class="o">-</span> <span class="n">nrow</span><span class="o">//</span><span class="n">NSUB</span> <span class="o">+</span> <span class="mi">1</span> 
+    <span class="c1"># print(A)</span>
+    <span class="c1"># print(&#39;phix&#39;, phix)</span>
+    <span class="c1"># print(&#39;phiy&#39;, phiy)</span>
+    <span class="c1"># print(isv, iev)</span>
+    <span class="c1"># print(nsy)</span>
+    <span class="c1"># print(nsx)</span>
+    <span class="c1"># print(isv-(iev-1))</span>
+    <span class="k">for</span> <span class="n">iy</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">isy</span><span class="p">,</span> <span class="n">isy</span><span class="o">+</span><span class="n">nsy</span><span class="p">):</span>
+        <span class="n">ieu</span> <span class="o">=</span> <span class="n">ncol</span> <span class="o">-</span> <span class="p">(</span><span class="n">NSUB</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">nsx</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">ncol</span><span class="o">//</span><span class="n">NSUB</span>
+        <span class="c1"># print(ieu) # TODO: verify that ieu==ncol if nsx = 1</span>
+        <span class="n">isu</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">for</span> <span class="n">ix</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">nsx</span><span class="p">):</span>
+            <span class="n">isec</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="c1"># print(isec, coef[isec-1])</span>
+            <span class="n">spr</span> <span class="o">=</span> <span class="n">coef</span><span class="p">[</span><span class="n">isec</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">real</span> <span class="c1"># NOTE Fortran casts Complex to Real directly</span>
+            <span class="n">spi</span> <span class="o">=</span> <span class="n">coef</span><span class="p">[</span><span class="n">isec</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">imag</span>
+            <span class="c1"># print(&#39;this coef&#39;, coef[isec-1])</span>
+            <span class="c1"># COEFS.append(coef[isec-1])</span>
+            <span class="k">for</span> <span class="n">vrow</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">isv</span><span class="p">,</span> <span class="n">iev</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span> 
+                <span class="c1"># print(&#39;vrow&#39;, vrow, &#39;isv&#39;, isv, &#39;iev&#39;, iev)</span>
+                <span class="k">if</span> <span class="n">vrow</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+                    <span class="n">row</span> <span class="o">=</span> <span class="n">vrow</span>
+                <span class="k">else</span><span class="p">:</span> 
+                    <span class="n">row</span> <span class="o">=</span> <span class="n">nrow</span> <span class="o">+</span> <span class="n">vrow</span>
+                <span class="k">if</span> <span class="n">row</span><span class="o">&gt;</span><span class="n">nrow</span><span class="o">//</span><span class="mi">2</span><span class="p">:</span> 
+                    <span class="n">V</span> <span class="o">=</span> <span class="p">(</span><span class="n">row</span> <span class="o">-</span> <span class="n">nrow</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="n">nrow</span>
+                <span class="k">else</span><span class="p">:</span> 
+                    <span class="n">V</span> <span class="o">=</span> <span class="p">(</span><span class="n">row</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="n">nrow</span>
+                <span class="n">rphase</span> <span class="o">=</span> <span class="o">-</span><span class="mi">2</span><span class="o">*</span><span class="n">phiy</span><span class="p">[</span><span class="n">npos</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">V</span>
+                <span class="c1"># rphase = rphase/2-1</span>
+                <span class="c1"># print(rphase)</span>
+                <span class="n">rpr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">rphase</span><span class="p">)</span>
+                <span class="n">rpi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">rphase</span><span class="p">)</span>
+                <span class="n">ypr</span> <span class="o">=</span> <span class="n">rpr</span><span class="o">*</span><span class="n">spr</span> <span class="o">-</span> <span class="n">rpi</span><span class="o">*</span><span class="n">spi</span>
+                <span class="n">ypi</span> <span class="o">=</span> <span class="n">rpi</span><span class="o">*</span><span class="n">spr</span> <span class="o">+</span> <span class="n">rpr</span><span class="o">*</span><span class="n">spi</span>
+                <span class="c1"># print(rphase, rpr, rpi, spr, spi, ypr, ypi, rpr*spr)</span>
+                <span class="c1"># print((ieu+1-isu)//2)</span>
+                <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">isu</span><span class="p">,</span> <span class="n">ieu</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">):</span>
+                    <span class="c1"># print(row, isv, iev, col, isu, ieu)</span>
+                    <span class="n">U</span> <span class="o">=</span> <span class="p">(</span><span class="n">col</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">ncol</span> <span class="o">-</span> <span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span>
+                    <span class="n">cphase</span> <span class="o">=</span> <span class="o">-</span><span class="mi">2</span><span class="o">*</span><span class="n">phix</span><span class="p">[</span><span class="n">npos</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">U</span>
+                    <span class="c1"># print(U, V)</span>
+                    <span class="c1"># print(rphase, cphase, phiy[npos-1], phiy[npos-1])</span>
+                    <span class="c1"># print(&#39; &#39;, cphase)</span>
+                    <span class="c1"># print(rphase, cphase)</span>
+                    <span class="n">cpr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">cphase</span><span class="p">)</span>
+                    <span class="n">cpi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">cphase</span><span class="p">)</span>
+                    <span class="n">tpr</span> <span class="o">=</span> <span class="n">ypr</span><span class="o">*</span><span class="n">cpr</span> <span class="o">-</span> <span class="n">ypi</span><span class="o">*</span><span class="n">cpi</span>
+                    <span class="n">tpi</span> <span class="o">=</span> <span class="n">ypi</span><span class="o">*</span><span class="n">cpr</span> <span class="o">+</span> <span class="n">ypr</span><span class="o">*</span><span class="n">cpi</span>
+                    <span class="c1"># print(vrow, row, col, isu, ieu+2)</span>
+                    <span class="n">fr</span> <span class="o">=</span> <span class="n">A</span><span class="p">[</span><span class="n">col</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">row</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="n">fi</span> <span class="o">=</span> <span class="n">A</span><span class="p">[</span><span class="n">col</span><span class="o">+</span><span class="mi">1</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">row</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="c1"># print(&#39;ypr&#39;, ypr, cpr, ypr*cpr, ypi, cpi, ypr*cpr - ypi*cpi, tpr,tpi)</span>
+                    <span class="c1"># print()</span>
+                    <span class="n">A</span><span class="p">[</span><span class="n">col</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">row</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">fr</span><span class="o">*</span><span class="n">tpr</span> <span class="o">-</span> <span class="n">fi</span><span class="o">*</span><span class="n">tpi</span>
+                    <span class="n">A</span><span class="p">[</span><span class="n">col</span><span class="o">+</span><span class="mi">1</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">row</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">fi</span><span class="o">*</span><span class="n">tpr</span> <span class="o">+</span> <span class="n">fr</span><span class="o">*</span><span class="n">tpi</span>
+            <span class="n">isu</span> <span class="o">=</span> <span class="n">ieu</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="n">ieu</span> <span class="o">=</span> <span class="n">ncol</span> <span class="o">-</span> <span class="p">(</span><span class="n">nsx</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">-</span> <span class="n">ix</span><span class="p">)</span><span class="o">*</span><span class="n">ncol</span><span class="o">//</span><span class="n">NSUB</span> <span class="c1"># TODO: check values</span>
+        <span class="n">isv</span> <span class="o">=</span> <span class="n">iev</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="n">iev</span> <span class="o">=</span> <span class="n">isv</span> <span class="o">-</span> <span class="n">nrow</span><span class="o">//</span><span class="n">NSUB</span> <span class="o">+</span> <span class="mi">1</span> <span class="c1"># TODO: check values</span>
+        <span class="k">if</span> <span class="n">iy</span><span class="o">==</span><span class="p">(</span><span class="n">isy</span> <span class="o">+</span> <span class="n">nsy</span> <span class="o">-</span> <span class="mi">2</span><span class="p">):</span> 
+            <span class="n">iev</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="n">nrow</span><span class="o">//</span><span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span> <span class="c1"># NOTE: add a bracket to change negative sign to minus sign</span>
+
+    <span class="c1"># print(vec)</span>
+    <span class="c1"># print(phasem)</span>
+    <span class="c1"># plt.imshow(vec.real)</span>
+    <span class="c1"># plt.colorbar()</span>
+    <span class="c1"># plt.show()</span>
+    <span class="c1"># plt.imshow(phasem.real)</span>
+    <span class="c1"># plt.colorbar()</span>
+    <span class="c1"># plt.show()</span>
+    <span class="c1"># plt.imshow((vec@phasem).real)</span>
+    <span class="c1"># plt.colorbar()</span>
+    <span class="c1"># plt.show()</span>
+    <span class="k">return</span> <span class="n">A</span></div>
+
+
+<div class="viewcode-block" id="four1">
+<a class="viewcode-back" href="../../dither.html#dither.legacy.four1">[docs]</a>
+<span class="k">def</span> <span class="nf">four1</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">nn</span><span class="p">,</span> <span class="n">isign</span><span class="p">):</span>
+    <span class="c1"># print(&#39;four1&#39;, data.size, nn, data)</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">nn</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="c1"># data = np.concatenate((data, np.zeros(10)))</span>
+    <span class="n">j</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">j</span> <span class="o">&gt;</span> <span class="n">i</span><span class="p">:</span>
+            <span class="n">data</span><span class="p">[</span><span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">data</span><span class="p">[</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        
+        <span class="n">m</span> <span class="o">=</span> <span class="n">n</span><span class="o">//</span><span class="mi">2</span>
+        <span class="k">while</span> <span class="n">m</span><span class="o">&gt;=</span><span class="mi">2</span> <span class="ow">and</span> <span class="n">j</span><span class="o">&gt;</span><span class="n">m</span><span class="p">:</span>
+            <span class="n">j</span> <span class="o">-=</span> <span class="n">m</span>
+            <span class="n">m</span> <span class="o">//=</span> <span class="mi">2</span>
+        <span class="n">j</span> <span class="o">+=</span> <span class="n">m</span>
+    
+    <span class="c1"># FFT computation</span>
+    <span class="n">mmax</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="k">while</span> <span class="n">n</span><span class="o">&gt;</span><span class="n">mmax</span><span class="p">:</span>
+        <span class="n">istep</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">mmax</span>
+        <span class="n">theta</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="p">(</span><span class="n">isign</span><span class="o">*</span><span class="n">mmax</span><span class="p">)</span>
+        <span class="n">wpr</span> <span class="o">=</span> <span class="o">-</span><span class="mf">2.0</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">theta</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>
+        <span class="n">wpi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
+        <span class="n">wr</span> <span class="o">=</span> <span class="mf">1.0</span>
+        <span class="n">wi</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">mmax</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">istep</span><span class="p">):</span>
+                <span class="n">j</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="n">mmax</span>
+                <span class="c1"># print(i, j, mmax, nn, n, istep, len(data))</span>
+                <span class="n">tempr</span> <span class="o">=</span> <span class="n">wr</span><span class="o">*</span><span class="n">data</span><span class="p">[</span><span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">wi</span><span class="o">*</span><span class="n">data</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+                <span class="n">tempi</span> <span class="o">=</span> <span class="n">wr</span><span class="o">*</span><span class="n">data</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">+</span> <span class="n">wi</span><span class="o">*</span><span class="n">data</span><span class="p">[</span><span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">data</span><span class="p">[</span><span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>  <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">tempr</span>
+                <span class="n">data</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">tempi</span>
+                <span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="n">tempr</span>
+                <span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+=</span> <span class="n">tempi</span>
+            <span class="n">wtemp</span> <span class="o">=</span> <span class="n">wr</span>
+            <span class="n">wr</span> <span class="o">=</span> <span class="n">wr</span><span class="o">*</span><span class="n">wpr</span> <span class="o">-</span> <span class="n">wi</span><span class="o">*</span><span class="n">wpi</span> <span class="o">+</span> <span class="n">wr</span>
+            <span class="n">wi</span> <span class="o">=</span> <span class="n">wi</span><span class="o">*</span><span class="n">wpr</span> <span class="o">+</span> <span class="n">wtemp</span><span class="o">*</span><span class="n">wpi</span> <span class="o">+</span> <span class="n">wi</span>
+        
+        <span class="n">mmax</span> <span class="o">=</span> <span class="n">istep</span>
+    <span class="c1"># return data[:-10]</span>
+    <span class="k">return</span> <span class="n">data</span></div>
+
+
+<div class="viewcode-block" id="realft">
+<a class="viewcode-back" href="../../dither.html#dither.legacy.realft">[docs]</a>
+<span class="k">def</span> <span class="nf">realft</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">isign</span><span class="p">):</span>
+    <span class="c1"># print(&#39;realft&#39;, data.size, n)</span>
+    <span class="n">theta</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">n</span><span class="p">)</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">wr</span> <span class="o">=</span> <span class="mf">1.0</span>
+    <span class="n">wi</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">c1</span> <span class="o">=</span> <span class="mf">0.5</span>
+    <span class="k">if</span> <span class="n">isign</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">c2</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.5</span>
+        <span class="c1"># print(data, n)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">four1</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="c1"># print(data)</span>
+        <span class="n">data</span><span class="p">[</span><span class="mi">2</span><span class="o">*</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">data</span><span class="p">[</span><span class="mi">2</span><span class="o">*</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">c2</span> <span class="o">=</span> <span class="mf">0.5</span>
+        <span class="n">theta</span> <span class="o">=</span> <span class="o">-</span><span class="n">theta</span>
+    <span class="n">wpr</span> <span class="o">=</span> <span class="o">-</span><span class="mf">2.0</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">theta</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>
+    <span class="n">wpi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
+    <span class="n">n2p3</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">n</span> <span class="o">+</span> <span class="mi">3</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n</span><span class="o">//</span><span class="mi">2</span><span class="o">+</span><span class="mi">2</span><span class="p">):</span>
+        <span class="n">i1</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="n">i2</span> <span class="o">=</span> <span class="n">i1</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="n">i3</span> <span class="o">=</span> <span class="n">n2p3</span> <span class="o">-</span> <span class="n">i2</span>
+        <span class="n">i4</span> <span class="o">=</span> <span class="n">i3</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="n">wrs</span> <span class="o">=</span> <span class="n">wr</span>
+        <span class="n">wis</span> <span class="o">=</span> <span class="n">wi</span>
+        <span class="n">h1r</span> <span class="o">=</span> <span class="n">c1</span><span class="o">*</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">i1</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">data</span><span class="p">[</span><span class="n">i3</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">h1i</span> <span class="o">=</span> <span class="n">c1</span><span class="o">*</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">i2</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">data</span><span class="p">[</span><span class="n">i4</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">h2r</span> <span class="o">=</span> <span class="o">-</span><span class="n">c2</span><span class="o">*</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">i2</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">data</span><span class="p">[</span><span class="n">i4</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">h2i</span> <span class="o">=</span> <span class="n">c2</span><span class="o">*</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">i1</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">data</span><span class="p">[</span><span class="n">i3</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">data</span><span class="p">[</span><span class="n">i1</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">h1r</span> <span class="o">+</span> <span class="n">wrs</span><span class="o">*</span><span class="n">h2r</span> <span class="o">-</span> <span class="n">wis</span><span class="o">*</span><span class="n">h2i</span>
+        <span class="n">data</span><span class="p">[</span><span class="n">i2</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">h1i</span> <span class="o">+</span> <span class="n">wrs</span><span class="o">*</span><span class="n">h2i</span> <span class="o">+</span> <span class="n">wis</span><span class="o">*</span><span class="n">h2r</span>
+        <span class="n">data</span><span class="p">[</span><span class="n">i3</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">h1r</span> <span class="o">-</span> <span class="n">wrs</span><span class="o">*</span><span class="n">h2r</span> <span class="o">+</span> <span class="n">wis</span><span class="o">*</span><span class="n">h2i</span>
+        <span class="n">data</span><span class="p">[</span><span class="n">i4</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">h1i</span> <span class="o">+</span> <span class="n">wrs</span><span class="o">*</span><span class="n">h2i</span> <span class="o">+</span> <span class="n">wis</span><span class="o">*</span><span class="n">h2r</span>
+        <span class="n">wtemp</span> <span class="o">=</span> <span class="n">wr</span>
+        <span class="n">wr</span> <span class="o">=</span> <span class="n">wr</span><span class="o">*</span><span class="n">wpr</span> <span class="o">-</span> <span class="n">wi</span><span class="o">*</span><span class="n">wpi</span> <span class="o">+</span> <span class="n">wr</span>
+        <span class="n">wi</span> <span class="o">=</span> <span class="n">wi</span><span class="o">*</span><span class="n">wpr</span> <span class="o">+</span> <span class="n">wtemp</span><span class="o">*</span><span class="n">wpi</span> <span class="o">+</span> <span class="n">wi</span>
+    <span class="k">if</span> <span class="n">isign</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">four1</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">data</span></div>
+
+
+<div class="viewcode-block" id="real2dfft">
+<a class="viewcode-back" href="../../dither.html#dither.legacy.real2dfft">[docs]</a>
+<span class="k">def</span> <span class="nf">real2dfft</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">nra</span><span class="p">,</span> <span class="n">nca</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">nrb</span><span class="p">,</span> <span class="n">ncb</span><span class="p">,</span> <span class="n">isign</span><span class="p">,</span> <span class="n">work</span><span class="p">,</span> <span class="n">onedim</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">a</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="n">b</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">work</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="n">nra</span><span class="p">,</span> <span class="n">nrb</span><span class="p">)))</span>
+    <span class="k">if</span> <span class="n">isign</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="c1"># print(a.shape, b.shape, nrb, ncb, a[:6, :nrb].shape)</span>
+        <span class="n">a</span><span class="p">[:</span><span class="n">ncb</span><span class="p">,</span> <span class="p">:</span><span class="n">nrb</span><span class="p">]</span> <span class="o">=</span> <span class="n">b</span>
+        <span class="n">a</span><span class="p">[</span><span class="n">ncb</span><span class="p">:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">nhc</span> <span class="o">=</span> <span class="p">(</span><span class="n">nca</span> <span class="o">-</span> <span class="mi">2</span><span class="p">)</span><span class="o">//</span><span class="mi">2</span>
+        <span class="c1"># print(nhc)</span>
+        <span class="k">for</span> <span class="n">ir</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nrb</span><span class="p">):</span>
+            <span class="n">a</span><span class="p">[:,</span> <span class="n">ir</span><span class="p">]</span> <span class="o">=</span> <span class="n">realft</span><span class="p">(</span><span class="n">a</span><span class="p">[:,</span> <span class="n">ir</span><span class="p">],</span> <span class="n">nhc</span><span class="p">,</span> <span class="n">isign</span><span class="p">)</span>
+        <span class="c1"># print(a)</span>
+        <span class="c1"># print(a[0, :].size, nhc)</span>
+        <span class="c1"># a[0, :] = realft(a[0, :], nhc, isign)</span>
+        <span class="k">if</span> <span class="n">onedim</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">a</span>
+        <span class="k">for</span> <span class="n">ic</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">nca</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">):</span>
+            <span class="c1"># print(&#39;ic&#39;, ic, a[ic+1-1, :nrb])</span>
+            <span class="c1"># print(a)</span>
+            <span class="n">work</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:</span><span class="n">nrb</span><span class="p">]</span> <span class="o">=</span> <span class="n">a</span><span class="p">[</span><span class="n">ic</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:</span><span class="n">nrb</span><span class="p">]</span>
+            <span class="n">work</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:</span><span class="n">nrb</span><span class="p">]</span> <span class="o">=</span> <span class="n">a</span><span class="p">[</span><span class="n">ic</span><span class="o">+</span><span class="mi">1</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:</span><span class="n">nrb</span><span class="p">]</span>
+            <span class="n">work</span><span class="p">[:,</span> <span class="n">nrb</span><span class="p">:]</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="c1"># print(&#39;work&#39;, &#39;nra&#39;, nra)</span>
+            <span class="n">work</span> <span class="o">=</span> <span class="n">four1</span><span class="p">(</span><span class="n">work</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="n">nra</span><span class="p">,</span> <span class="n">isign</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+            <span class="c1"># print(work)</span>
+            <span class="n">a</span><span class="p">[</span><span class="n">ic</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">work</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="n">a</span><span class="p">[</span><span class="n">ic</span><span class="o">+</span><span class="mi">1</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">work</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">onedim</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">ic</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">ncb</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">):</span>
+                <span class="n">work</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:</span><span class="n">nrb</span><span class="p">]</span> <span class="o">=</span> <span class="n">b</span><span class="p">[</span><span class="n">ic</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:</span><span class="n">nrb</span><span class="p">]</span>
+                <span class="n">work</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:</span><span class="n">nrb</span><span class="p">]</span> <span class="o">=</span> <span class="n">b</span><span class="p">[</span><span class="n">ic</span><span class="o">+</span><span class="mi">1</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:</span><span class="n">nrb</span><span class="p">]</span>
+                <span class="c1"># print(&#39;work2&#39;, &#39;nra&#39;, nra)</span>
+                <span class="n">work</span> <span class="o">=</span> <span class="n">four1</span><span class="p">(</span><span class="n">work</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="n">nra</span><span class="p">,</span> <span class="n">isign</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+                <span class="n">b</span><span class="p">[</span><span class="n">ic</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">work</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span>
+                <span class="n">b</span><span class="p">[</span><span class="n">ic</span><span class="o">+</span><span class="mi">1</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">work</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="n">nhc</span> <span class="o">=</span> <span class="p">(</span><span class="n">ncb</span> <span class="o">-</span> <span class="mi">2</span><span class="p">)</span><span class="o">//</span><span class="mi">2</span>
+        <span class="k">for</span> <span class="n">ir</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nra</span><span class="p">):</span>
+            <span class="n">b</span><span class="p">[:,</span> <span class="n">ir</span><span class="p">]</span> <span class="o">=</span> <span class="n">realft</span><span class="p">(</span><span class="n">b</span><span class="p">[:,</span> <span class="n">ir</span><span class="p">],</span> <span class="n">nhc</span><span class="p">,</span> <span class="n">isign</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">onedim</span><span class="p">:</span>
+            <span class="n">tmp</span> <span class="o">=</span> <span class="mf">1.0</span><span class="o">/</span><span class="n">nhc</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">tmp</span> <span class="o">=</span> <span class="mf">1.0</span><span class="o">/</span><span class="p">(</span><span class="n">nrb</span><span class="o">*</span><span class="n">nhc</span><span class="p">)</span>
+        <span class="n">a</span><span class="p">[:</span><span class="n">nca</span><span class="p">,</span> <span class="p">:</span><span class="n">nra</span><span class="p">]</span> <span class="o">=</span> <span class="n">b</span><span class="p">[:</span><span class="n">nca</span><span class="p">,</span> <span class="p">:</span><span class="n">nra</span><span class="p">]</span><span class="o">*</span><span class="n">tmp</span>
+    <span class="k">return</span> <span class="n">a</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Yichen Liu.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
