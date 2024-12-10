@@ -1,8 +1,8 @@
 dither package
 ==============
 
-Submodules
-----------
+.. Submodules
+.. ----------
 
 dither.legacy module
 --------------------
@@ -36,10 +36,10 @@ dither.wrapper module
    :undoc-members:
    :show-inheritance:
 
-Module contents
----------------
+.. Module contents
+.. ---------------
 
-.. automodule:: dither
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. .. automodule:: dither
+..    :members:
+..    :undoc-members:
+..    :show-inheritance:

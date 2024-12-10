@@ -1,7 +1,4 @@
 """
-legacy.py
-=========
-
 This module contains Python translations of functions from the Fortran77 code
 described in Luer's (1999) paper. These functions implement advanced Fourier
 transform techniques and phase calculations for astronomical image processing.
@@ -34,6 +31,7 @@ adjusted_array = legacy.phase(input_array, nrow=256, ncol=256, shift=True, DR=0.
 
 # Example: 1D FFT
 fft_result = legacy.four1(data, nn=128, isign=1)
+```
 """
 
 import numpy as np
