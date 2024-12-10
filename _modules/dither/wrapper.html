@@ -44,7 +44,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../introduction.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tutorial.html">Tutorial</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../dither.html">dither package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dither.html">API Documentation</a></li>
 </ul>
 
         </div>
@@ -88,7 +88,7 @@
 <span class="n">reload</span><span class="p">(</span><span class="n">legacy</span><span class="p">)</span>
 
 <div class="viewcode-block" id="set_padding_size">
-<a class="viewcode-back" href="../../dither.html#dither.wrapper.set_padding_size">[docs]</a>
+<a class="viewcode-back" href="../../dither_wrapper.html#dither.wrapper.set_padding_size">[docs]</a>
 <span class="k">def</span> <span class="nf">set_padding_size</span><span class="p">(</span><span class="n">NC</span><span class="p">,</span> <span class="n">NR</span><span class="p">):</span>
     <span class="k">global</span> <span class="n">NC_FREQ</span><span class="p">,</span> <span class="n">NR_FREQ</span><span class="p">,</span> <span class="n">NC_SPAT</span><span class="p">,</span> <span class="n">NR_SPAT</span>
     <span class="n">NC_FREQ</span> <span class="o">=</span> <span class="n">NC</span>
@@ -98,14 +98,14 @@
 
 
 <div class="viewcode-block" id="set_dither_size">
-<a class="viewcode-back" href="../../dither.html#dither.wrapper.set_dither_size">[docs]</a>
+<a class="viewcode-back" href="../../dither_wrapper.html#dither.wrapper.set_dither_size">[docs]</a>
 <span class="k">def</span> <span class="nf">set_dither_size</span><span class="p">(</span><span class="n">factor</span><span class="p">):</span>
     <span class="k">global</span> <span class="n">NSUB</span>
     <span class="n">NSUB</span> <span class="o">=</span> <span class="n">factor</span></div>
 
 
 <div class="viewcode-block" id="fft">
-<a class="viewcode-back" href="../../dither.html#dither.wrapper.fft">[docs]</a>
+<a class="viewcode-back" href="../../dither_wrapper.html#dither.wrapper.fft">[docs]</a>
 <span class="k">def</span> <span class="nf">fft</span><span class="p">(</span><span class="n">data</span><span class="p">):</span> 
     <span class="n">b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">NC_SPAT</span><span class="p">,</span> <span class="n">NR_SPAT</span><span class="p">))</span>
     <span class="n">b</span><span class="p">[:</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">:</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span> <span class="o">=</span> <span class="n">data</span>
@@ -120,7 +120,7 @@
 
 
 <div class="viewcode-block" id="ifft">
-<a class="viewcode-back" href="../../dither.html#dither.wrapper.ifft">[docs]</a>
+<a class="viewcode-back" href="../../dither_wrapper.html#dither.wrapper.ifft">[docs]</a>
 <span class="k">def</span> <span class="nf">ifft</span><span class="p">(</span><span class="n">data_hat</span><span class="p">):</span> 
     <span class="n">b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">NC_FREQ</span><span class="p">,</span> <span class="n">NR_FREQ</span><span class="p">))</span>
     <span class="n">b</span><span class="p">[:</span><span class="n">data_hat</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">:</span><span class="n">data_hat</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span> <span class="o">=</span> <span class="n">data_hat</span>
@@ -135,7 +135,7 @@
 
 
 <div class="viewcode-block" id="phase_shift">
-<a class="viewcode-back" href="../../dither.html#dither.wrapper.phase_shift">[docs]</a>
+<a class="viewcode-back" href="../../dither_wrapper.html#dither.wrapper.phase_shift">[docs]</a>
 <span class="k">def</span> <span class="nf">phase_shift</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">offsets</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
     <span class="n">DR</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="n">DC</span> <span class="o">=</span> <span class="mi">0</span>

@@ -1,0 +1,231 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Utils Module &mdash; Proper Dither 0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=2709fde1"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Wrapper Module" href="dither_wrapper.html" />
+    <link rel="prev" title="Updated Module" href="dither_updated.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Proper Dither
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Documentation</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="dither.html">API Documentation</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="dither_legacy.html">Legacy Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dither_updated.html">Updated Module</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Utils Module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#dither.utils.calculate_padding_radius"><code class="docutils literal notranslate"><span class="pre">calculate_padding_radius()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#dither.utils.create_cutout_fits"><code class="docutils literal notranslate"><span class="pre">create_cutout_fits()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#dither.utils.extract_central_region"><code class="docutils literal notranslate"><span class="pre">extract_central_region()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#dither.utils.get_brightest_pixel"><code class="docutils literal notranslate"><span class="pre">get_brightest_pixel()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#dither.utils.get_centroids_using_DAOStarFinder"><code class="docutils literal notranslate"><span class="pre">get_centroids_using_DAOStarFinder()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#dither.utils.get_centroids_using_centroid_com"><code class="docutils literal notranslate"><span class="pre">get_centroids_using_centroid_com()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#dither.utils.get_cosmic_ray_mask_without_AGN"><code class="docutils literal notranslate"><span class="pre">get_cosmic_ray_mask_without_AGN()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#dither.utils.get_pixel_center_coordinate"><code class="docutils literal notranslate"><span class="pre">get_pixel_center_coordinate()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#dither.utils.get_pixel_center_from_array"><code class="docutils literal notranslate"><span class="pre">get_pixel_center_from_array()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#dither.utils.get_power_spectrum"><code class="docutils literal notranslate"><span class="pre">get_power_spectrum()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#dither.utils.get_power_spectrum_from_realfft2d"><code class="docutils literal notranslate"><span class="pre">get_power_spectrum_from_realfft2d()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#dither.utils.norm"><code class="docutils literal notranslate"><span class="pre">norm()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#dither.utils.pad_image_with_centroid"><code class="docutils literal notranslate"><span class="pre">pad_image_with_centroid()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="dither_wrapper.html">Wrapper Module</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Proper Dither</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="dither.html">API Documentation</a></li>
+      <li class="breadcrumb-item active">Utils Module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/dither_utils.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-dither.utils">
+<span id="utils-module"></span><h1>Utils Module<a class="headerlink" href="#module-dither.utils" title="Link to this heading"></a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="dither.utils.calculate_padding_radius">
+<span class="sig-prename descclassname"><span class="pre">dither.utils.</span></span><span class="sig-name descname"><span class="pre">calculate_padding_radius</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">centroids_int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dither/utils.html#calculate_padding_radius"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dither.utils.calculate_padding_radius" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="dither.utils.create_cutout_fits">
+<span class="sig-prename descclassname"><span class="pre">dither.utils.</span></span><span class="sig-name descname"><span class="pre">create_cutout_fits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fits_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cutout_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coord</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dither/utils.html#create_cutout_fits"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dither.utils.create_cutout_fits" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fits_path</strong> – string</p></li>
+<li><p><strong>output_path</strong> – string</p></li>
+<li><p><strong>coord</strong> – SkyCoord</p></li>
+<li><p><strong>radius</strong> – float (in arcsec)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="dither.utils.extract_central_region">
+<span class="sig-prename descclassname"><span class="pre">dither.utils.</span></span><span class="sig-name descname"><span class="pre">extract_central_region</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fraction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">center</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dither/utils.html#extract_central_region"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dither.utils.extract_central_region" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="dither.utils.get_brightest_pixel">
+<span class="sig-prename descclassname"><span class="pre">dither.utils.</span></span><span class="sig-name descname"><span class="pre">get_brightest_pixel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ymin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ymax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dither/utils.html#get_brightest_pixel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dither.utils.get_brightest_pixel" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="dither.utils.get_centroids_using_DAOStarFinder">
+<span class="sig-prename descclassname"><span class="pre">dither.utils.</span></span><span class="sig-name descname"><span class="pre">get_centroids_using_DAOStarFinder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">center_x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">center_y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dither/utils.html#get_centroids_using_DAOStarFinder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dither.utils.get_centroids_using_DAOStarFinder" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="dither.utils.get_centroids_using_centroid_com">
+<span class="sig-prename descclassname"><span class="pre">dither.utils.</span></span><span class="sig-name descname"><span class="pre">get_centroids_using_centroid_com</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">center_x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">center_y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dither/utils.html#get_centroids_using_centroid_com"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dither.utils.get_centroids_using_centroid_com" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="dither.utils.get_cosmic_ray_mask_without_AGN">
+<span class="sig-prename descclassname"><span class="pre">dither.utils.</span></span><span class="sig-name descname"><span class="pre">get_cosmic_ray_mask_without_AGN</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_connected_pixels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">12</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dither/utils.html#get_cosmic_ray_mask_without_AGN"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dither.utils.get_cosmic_ray_mask_without_AGN" title="Link to this definition"></a></dt>
+<dd><p>Detect cosmic rays in an image based on pixel differences from a smoothed version,
+while ignoring regions connected by more than a certain number of pixels.</p>
+<section id="parameters">
+<h2>Parameters:<a class="headerlink" href="#parameters" title="Link to this heading"></a></h2>
+<dl class="simple">
+<dt>image_data<span class="classifier">2D numpy array</span></dt><dd><p>The input image data.</p>
+</dd>
+<dt>kernel_size<span class="classifier">int, optional</span></dt><dd><p>Size of the box kernel for smoothing (default is 3x3).</p>
+</dd>
+<dt>sigma_threshold<span class="classifier">float, optional</span></dt><dd><p>Threshold for detecting cosmic rays in units of standard deviation (default is 5).</p>
+</dd>
+<dt>max_connected_pixels<span class="classifier">int, optional</span></dt><dd><p>Maximum number of connected pixels allowed for a region to be considered a cosmic ray (default is 10).</p>
+</dd>
+</dl>
+</section>
+<section id="returns">
+<h2>Returns:<a class="headerlink" href="#returns" title="Link to this heading"></a></h2>
+<dl class="simple">
+<dt>cosmic_ray_mask<span class="classifier">2D numpy array</span></dt><dd><p>A boolean mask where cosmic rays are detected (True means cosmic ray).</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="dither.utils.get_pixel_center_coordinate">
+<span class="sig-prename descclassname"><span class="pre">dither.utils.</span></span><span class="sig-name descname"><span class="pre">get_pixel_center_coordinate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fits_path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dither/utils.html#get_pixel_center_coordinate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dither.utils.get_pixel_center_coordinate" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="dither.utils.get_pixel_center_from_array">
+<span class="sig-prename descclassname"><span class="pre">dither.utils.</span></span><span class="sig-name descname"><span class="pre">get_pixel_center_from_array</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dither/utils.html#get_pixel_center_from_array"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dither.utils.get_pixel_center_from_array" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="dither.utils.get_power_spectrum">
+<span class="sig-prename descclassname"><span class="pre">dither.utils.</span></span><span class="sig-name descname"><span class="pre">get_power_spectrum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fft_result</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dither/utils.html#get_power_spectrum"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dither.utils.get_power_spectrum" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="dither.utils.get_power_spectrum_from_realfft2d">
+<span class="sig-prename descclassname"><span class="pre">dither.utils.</span></span><span class="sig-name descname"><span class="pre">get_power_spectrum_from_realfft2d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Atotal</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dither/utils.html#get_power_spectrum_from_realfft2d"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dither.utils.get_power_spectrum_from_realfft2d" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="dither.utils.norm">
+<span class="sig-prename descclassname"><span class="pre">dither.utils.</span></span><span class="sig-name descname"><span class="pre">norm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">z</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dither/utils.html#norm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dither.utils.norm" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="dither.utils.pad_image_with_centroid">
+<span class="sig-prename descclassname"><span class="pre">dither.utils.</span></span><span class="sig-name descname"><span class="pre">pad_image_with_centroid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pad</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">centroid_int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dither/utils.html#pad_image_with_centroid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dither.utils.pad_image_with_centroid" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="dither_updated.html" class="btn btn-neutral float-left" title="Updated Module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="dither_wrapper.html" class="btn btn-neutral float-right" title="Wrapper Module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Yichen Liu.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

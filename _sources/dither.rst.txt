@@ -1,42 +1,16 @@
-dither package
-==============
+API Documentation
+=================
 
-.. Submodules
-.. ----------
+.. toctree::
+   :maxdepth: 2
+   :caption: Submodules
 
-dither.legacy module
---------------------
+   dither_legacy
+   dither_updated
+   dither_utils
+   dither_wrapper
 
-.. automodule:: dither.legacy
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-dither.updated module
----------------------
-
-.. automodule:: dither.updated
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-dither.utils module
--------------------
-
-.. automodule:: dither.utils
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-dither.wrapper module
----------------------
-
-.. automodule:: dither.wrapper
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-.. Module contents
+.. Module Contents
 .. ---------------
 
 .. .. automodule:: dither

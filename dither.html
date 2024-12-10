@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>dither package &mdash; Proper Dither 0.1 documentation</title>
+  <title>API Documentation &mdash; Proper Dither 0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
 
@@ -19,6 +19,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Legacy Module" href="dither_legacy.html" />
     <link rel="prev" title="Tutorial" href="tutorial.html" /> 
 </head>
 
@@ -46,53 +47,11 @@
 <li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">dither package</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#module-dither.legacy">dither.legacy module</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#reference">Reference:</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#key-features">Key Features:</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#assumptions-and-constraints">Assumptions and Constraints:</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#example-usage">Example Usage:</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#dither.legacy.four1"><code class="docutils literal notranslate"><span class="pre">four1()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#dither.legacy.phase"><code class="docutils literal notranslate"><span class="pre">phase()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#dither.legacy.real2dfft"><code class="docutils literal notranslate"><span class="pre">real2dfft()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#dither.legacy.realft"><code class="docutils literal notranslate"><span class="pre">realft()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#module-dither.updated">dither.updated module</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#dither.updated.four1_backward"><code class="docutils literal notranslate"><span class="pre">four1_backward()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#dither.updated.four1_forward"><code class="docutils literal notranslate"><span class="pre">four1_forward()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#dither.updated.phase_shift"><code class="docutils literal notranslate"><span class="pre">phase_shift()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#dither.updated.phase_updated"><code class="docutils literal notranslate"><span class="pre">phase_updated()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#dither.updated.real2dfft_backward"><code class="docutils literal notranslate"><span class="pre">real2dfft_backward()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#dither.updated.real2dfft_forward"><code class="docutils literal notranslate"><span class="pre">real2dfft_forward()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#dither.updated.realft_backward"><code class="docutils literal notranslate"><span class="pre">realft_backward()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#dither.updated.realft_forward"><code class="docutils literal notranslate"><span class="pre">realft_forward()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#module-dither.utils">dither.utils module</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#dither.utils.calculate_padding_radius"><code class="docutils literal notranslate"><span class="pre">calculate_padding_radius()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#dither.utils.create_cutout_fits"><code class="docutils literal notranslate"><span class="pre">create_cutout_fits()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#dither.utils.extract_central_region"><code class="docutils literal notranslate"><span class="pre">extract_central_region()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#dither.utils.get_brightest_pixel"><code class="docutils literal notranslate"><span class="pre">get_brightest_pixel()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#dither.utils.get_centroids_using_DAOStarFinder"><code class="docutils literal notranslate"><span class="pre">get_centroids_using_DAOStarFinder()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#dither.utils.get_centroids_using_centroid_com"><code class="docutils literal notranslate"><span class="pre">get_centroids_using_centroid_com()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#dither.utils.get_cosmic_ray_mask_without_AGN"><code class="docutils literal notranslate"><span class="pre">get_cosmic_ray_mask_without_AGN()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#dither.utils.get_pixel_center_coordinate"><code class="docutils literal notranslate"><span class="pre">get_pixel_center_coordinate()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#dither.utils.get_pixel_center_from_array"><code class="docutils literal notranslate"><span class="pre">get_pixel_center_from_array()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#dither.utils.get_power_spectrum"><code class="docutils literal notranslate"><span class="pre">get_power_spectrum()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#dither.utils.get_power_spectrum_from_realfft2d"><code class="docutils literal notranslate"><span class="pre">get_power_spectrum_from_realfft2d()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#dither.utils.norm"><code class="docutils literal notranslate"><span class="pre">norm()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#dither.utils.pad_image_with_centroid"><code class="docutils literal notranslate"><span class="pre">pad_image_with_centroid()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#module-dither.wrapper">dither.wrapper module</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#dither.wrapper.fft"><code class="docutils literal notranslate"><span class="pre">fft()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#dither.wrapper.ifft"><code class="docutils literal notranslate"><span class="pre">ifft()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#dither.wrapper.phase_shift"><code class="docutils literal notranslate"><span class="pre">phase_shift()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#dither.wrapper.set_dither_size"><code class="docutils literal notranslate"><span class="pre">set_dither_size()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#dither.wrapper.set_padding_size"><code class="docutils literal notranslate"><span class="pre">set_padding_size()</span></code></a></li>
-</ul>
-</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">API Documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="dither_legacy.html">Legacy Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dither_updated.html">Updated Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dither_utils.html">Utils Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dither_wrapper.html">Wrapper Module</a></li>
 </ul>
 </li>
 </ul>
@@ -111,7 +70,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">dither package</li>
+      <li class="breadcrumb-item active">API Documentation</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/dither.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -121,387 +80,59 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="dither-package">
-<h1>dither package<a class="headerlink" href="#dither-package" title="Link to this heading"></a></h1>
-<section id="module-dither.legacy">
-<span id="dither-legacy-module"></span><h2>dither.legacy module<a class="headerlink" href="#module-dither.legacy" title="Link to this heading"></a></h2>
-<p>This module contains Python translations of functions from the Fortran77 code
-described in Luer’s (1999) paper. These functions implement advanced Fourier
-transform techniques and phase calculations for astronomical image processing.</p>
-<section id="reference">
-<h3>Reference:<a class="headerlink" href="#reference" title="Link to this heading"></a></h3>
-<p>Luer, T. M. (1999). Combining Undersampled Dithered Images.</p>
-</section>
-<section id="key-features">
-<h3>Key Features:<a class="headerlink" href="#key-features" title="Link to this heading"></a></h3>
-<ul class="simple">
-<li><p>Phase adjustment and coefficient calculations using the <cite>phase</cite> function.</p></li>
-<li><p>1D complex-to-complex FFT using <cite>four1</cite>.</p></li>
-<li><p>Real-to-complex and complex-to-real FFT using <cite>realft</cite>.</p></li>
-<li><p>2D FFT transformations using <cite>real2dfft</cite>.</p></li>
+  <section id="api-documentation">
+<h1>API Documentation<a class="headerlink" href="#api-documentation" title="Link to this heading"></a></h1>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Submodules</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="dither_legacy.html">Legacy Module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="dither_legacy.html#reference">Reference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dither_legacy.html#key-features">Key Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dither_legacy.html#assumptions-and-constraints">Assumptions and Constraints</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dither_legacy.html#example-usage">Example Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dither_legacy.html#dither.legacy.four1"><code class="docutils literal notranslate"><span class="pre">four1()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="dither_legacy.html#dither.legacy.phase"><code class="docutils literal notranslate"><span class="pre">phase()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="dither_legacy.html#dither.legacy.real2dfft"><code class="docutils literal notranslate"><span class="pre">real2dfft()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="dither_legacy.html#dither.legacy.realft"><code class="docutils literal notranslate"><span class="pre">realft()</span></code></a></li>
 </ul>
-</section>
-<section id="assumptions-and-constraints">
-<h3>Assumptions and Constraints:<a class="headerlink" href="#assumptions-and-constraints" title="Link to this heading"></a></h3>
-<ul class="simple">
-<li><p>The code assumes compatibility with numpy arrays for numerical computations.</p></li>
-<li><p>Some algorithmic logic and constants (e.g., NSTMAX, NDIV) are directly ported
-from the Fortran77 code.</p></li>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="dither_updated.html">Updated Module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="dither_updated.html#dither.updated.four1_backward"><code class="docutils literal notranslate"><span class="pre">four1_backward()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="dither_updated.html#dither.updated.four1_forward"><code class="docutils literal notranslate"><span class="pre">four1_forward()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="dither_updated.html#dither.updated.phase_shift"><code class="docutils literal notranslate"><span class="pre">phase_shift()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="dither_updated.html#dither.updated.phase_updated"><code class="docutils literal notranslate"><span class="pre">phase_updated()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="dither_updated.html#dither.updated.real2dfft_backward"><code class="docutils literal notranslate"><span class="pre">real2dfft_backward()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="dither_updated.html#dither.updated.real2dfft_forward"><code class="docutils literal notranslate"><span class="pre">real2dfft_forward()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="dither_updated.html#dither.updated.realft_backward"><code class="docutils literal notranslate"><span class="pre">realft_backward()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="dither_updated.html#dither.updated.realft_forward"><code class="docutils literal notranslate"><span class="pre">realft_forward()</span></code></a></li>
 </ul>
-</section>
-<section id="example-usage">
-<h3>Example Usage:<a class="headerlink" href="#example-usage" title="Link to this heading"></a></h3>
-<p><a href="#id1"><span class="problematic" id="id2">``</span></a><a href="#id3"><span class="problematic" id="id4">`</span></a>python
-import legacy</p>
-<p># Example: Perform phase adjustment
-input_array = …  # Your 2D numpy array
-adjusted_array = legacy.phase(input_array, nrow=256, ncol=256, shift=True, DR=0.1, DC=0.2, offsets=[[0, 0, 1]], npos=1)</p>
-<p># Example: 1D FFT
-fft_result = legacy.four1(data, nn=128, isign=1)
-<a href="#id5"><span class="problematic" id="id6">``</span></a><a href="#id7"><span class="problematic" id="id8">`</span></a></p>
-</section>
-<dl class="py function">
-<dt class="sig sig-object py" id="dither.legacy.four1">
-<span class="sig-prename descclassname"><span class="pre">dither.legacy.</span></span><span class="sig-name descname"><span class="pre">four1</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">isign</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dither/legacy.html#four1"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dither.legacy.four1" title="Link to this definition"></a></dt>
-<dd><p>Perform a 1D complex-to-complex Fast Fourier Transform (FFT).</p>
-<section id="id9">
-<h3>Reference:<a class="headerlink" href="#id9" title="Link to this heading"></a></h3>
-<p>W.H. Press et.al. “Numerical Recipes” (JJGG).</p>
-<dl class="field-list simple">
-<dt class="field-odd">param data<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Input array of length <cite>2 * nn</cite>, alternating real and imaginary components.</p>
-</dd>
-<dt class="field-even">type data<span class="colon">:</span></dt>
-<dd class="field-even"><p>ndarray</p>
-</dd>
-<dt class="field-odd">param nn<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Number of complex elements in the data.</p>
-</dd>
-<dt class="field-even">type nn<span class="colon">:</span></dt>
-<dd class="field-even"><p>int</p>
-</dd>
-<dt class="field-odd">param isign<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Sign of the exponent in the FFT; <cite>1</cite> for forward transform, <cite>-1</cite> for inverse transform.</p>
-</dd>
-<dt class="field-even">type isign<span class="colon">:</span></dt>
-<dd class="field-even"><p>int</p>
-</dd>
-<dt class="field-odd">returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Transformed data array of the same shape as the input.</p>
-</dd>
-<dt class="field-even">rtype<span class="colon">:</span></dt>
-<dd class="field-even"><p>ndarray</p>
-</dd>
-</dl>
-</section>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="dither.legacy.phase">
-<span class="sig-prename descclassname"><span class="pre">dither.legacy.</span></span><span class="sig-name descname"><span class="pre">phase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">A_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nrow</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ncol</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shift</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">DR</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">DC</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offsets</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">npos</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dither/legacy.html#phase"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dither.legacy.phase" title="Link to this definition"></a></dt>
-<dd><p>Apply phase shifts and calculate coefficients for Fourier-based image transformations.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>A_in</strong> (<em>ndarray</em>) – Input 2D array representing the Fourier-transformed data.</p></li>
-<li><p><strong>nrow</strong> (<em>int</em>) – Number of rows in the data.</p></li>
-<li><p><strong>ncol</strong> (<em>int</em>) – Number of columns in the data.</p></li>
-<li><p><strong>shift</strong> (<em>bool</em>) – Whether to apply a global phase shift based on <cite>DR</cite> and <cite>DC</cite>.</p></li>
-<li><p><strong>DR</strong> (<em>float</em>) – Row shift factor.</p></li>
-<li><p><strong>DC</strong> (<em>float</em>) – Column shift factor.</p></li>
-<li><p><strong>offsets</strong> (<em>ndarray</em>) – Array of offsets and weights, with shape (n, 3), where the columns are x-offset, y-offset, and weight.</p></li>
-<li><p><strong>npos</strong> (<em>int</em>) – Index of the position for which the coefficients are computed.</p></li>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="dither_utils.html">Utils Module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="dither_utils.html#dither.utils.calculate_padding_radius"><code class="docutils literal notranslate"><span class="pre">calculate_padding_radius()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="dither_utils.html#dither.utils.create_cutout_fits"><code class="docutils literal notranslate"><span class="pre">create_cutout_fits()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="dither_utils.html#dither.utils.extract_central_region"><code class="docutils literal notranslate"><span class="pre">extract_central_region()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="dither_utils.html#dither.utils.get_brightest_pixel"><code class="docutils literal notranslate"><span class="pre">get_brightest_pixel()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="dither_utils.html#dither.utils.get_centroids_using_DAOStarFinder"><code class="docutils literal notranslate"><span class="pre">get_centroids_using_DAOStarFinder()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="dither_utils.html#dither.utils.get_centroids_using_centroid_com"><code class="docutils literal notranslate"><span class="pre">get_centroids_using_centroid_com()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="dither_utils.html#dither.utils.get_cosmic_ray_mask_without_AGN"><code class="docutils literal notranslate"><span class="pre">get_cosmic_ray_mask_without_AGN()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="dither_utils.html#dither.utils.get_pixel_center_coordinate"><code class="docutils literal notranslate"><span class="pre">get_pixel_center_coordinate()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="dither_utils.html#dither.utils.get_pixel_center_from_array"><code class="docutils literal notranslate"><span class="pre">get_pixel_center_from_array()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="dither_utils.html#dither.utils.get_power_spectrum"><code class="docutils literal notranslate"><span class="pre">get_power_spectrum()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="dither_utils.html#dither.utils.get_power_spectrum_from_realfft2d"><code class="docutils literal notranslate"><span class="pre">get_power_spectrum_from_realfft2d()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="dither_utils.html#dither.utils.norm"><code class="docutils literal notranslate"><span class="pre">norm()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="dither_utils.html#dither.utils.pad_image_with_centroid"><code class="docutils literal notranslate"><span class="pre">pad_image_with_centroid()</span></code></a></li>
 </ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Modified 2D array after phase adjustment and transformation.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>ndarray</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="dither.legacy.real2dfft">
-<span class="sig-prename descclassname"><span class="pre">dither.legacy.</span></span><span class="sig-name descname"><span class="pre">real2dfft</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nra</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nca</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nrb</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ncb</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">isign</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">work</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">onedim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dither/legacy.html#real2dfft"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dither.legacy.real2dfft" title="Link to this definition"></a></dt>
-<dd><p>Perform a 2D real-to-complex or complex-to-real FFT transformation.</p>
-<section id="id10">
-<h3>Reference:<a class="headerlink" href="#id10" title="Link to this heading"></a></h3>
-<p>W.H. Press et.al. “Numerical Recipes” (JJGG).</p>
-<dl class="field-list simple">
-<dt class="field-odd">param a<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Input/output array for the transformation.</p>
-</dd>
-<dt class="field-even">type a<span class="colon">:</span></dt>
-<dd class="field-even"><p>ndarray</p>
-</dd>
-<dt class="field-odd">param nra<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Number of rows in the input array.</p>
-</dd>
-<dt class="field-even">type nra<span class="colon">:</span></dt>
-<dd class="field-even"><p>int</p>
-</dd>
-<dt class="field-odd">param nca<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Number of columns in the input array.</p>
-</dd>
-<dt class="field-even">type nca<span class="colon">:</span></dt>
-<dd class="field-even"><p>int</p>
-</dd>
-<dt class="field-odd">param b<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Auxiliary array for intermediate transformations.</p>
-</dd>
-<dt class="field-even">type b<span class="colon">:</span></dt>
-<dd class="field-even"><p>ndarray</p>
-</dd>
-<dt class="field-odd">param nrb<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Number of rows in the auxiliary array.</p>
-</dd>
-<dt class="field-even">type nrb<span class="colon">:</span></dt>
-<dd class="field-even"><p>int</p>
-</dd>
-<dt class="field-odd">param ncb<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Number of columns in the auxiliary array.</p>
-</dd>
-<dt class="field-even">type ncb<span class="colon">:</span></dt>
-<dd class="field-even"><p>int</p>
-</dd>
-<dt class="field-odd">param isign<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Sign of the exponent in the FFT; <cite>1</cite> for forward transform, <cite>-1</cite> for inverse transform.</p>
-</dd>
-<dt class="field-even">type isign<span class="colon">:</span></dt>
-<dd class="field-even"><p>int</p>
-</dd>
-<dt class="field-odd">param work<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Temporary work array for intermediate calculations.</p>
-</dd>
-<dt class="field-even">type work<span class="colon">:</span></dt>
-<dd class="field-even"><p>ndarray</p>
-</dd>
-<dt class="field-odd">param onedim<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Whether to perform a 1D FFT along the first dimension only. Default is False.</p>
-</dd>
-<dt class="field-even">type onedim<span class="colon">:</span></dt>
-<dd class="field-even"><p>bool, optional</p>
-</dd>
-<dt class="field-odd">returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Transformed data array.</p>
-</dd>
-<dt class="field-even">rtype<span class="colon">:</span></dt>
-<dd class="field-even"><p>ndarray</p>
-</dd>
-</dl>
-</section>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="dither.legacy.realft">
-<span class="sig-prename descclassname"><span class="pre">dither.legacy.</span></span><span class="sig-name descname"><span class="pre">realft</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">isign</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dither/legacy.html#realft"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dither.legacy.realft" title="Link to this definition"></a></dt>
-<dd><p>Perform a real-to-complex or complex-to-real FFT transformation.</p>
-<section id="id11">
-<h3>Reference:<a class="headerlink" href="#id11" title="Link to this heading"></a></h3>
-<p>W.H. Press et.al. “Numerical Recipes” (JJGG).</p>
-<dl class="field-list simple">
-<dt class="field-odd">param data<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Input array of length <cite>2 * n</cite>.</p>
-</dd>
-<dt class="field-even">type data<span class="colon">:</span></dt>
-<dd class="field-even"><p>ndarray</p>
-</dd>
-<dt class="field-odd">param n<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Number of real elements in the data.</p>
-</dd>
-<dt class="field-even">type n<span class="colon">:</span></dt>
-<dd class="field-even"><p>int</p>
-</dd>
-<dt class="field-odd">param isign<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Sign of the exponent in the FFT; <cite>1</cite> for forward transform, <cite>-1</cite> for inverse transform.</p>
-</dd>
-<dt class="field-even">type isign<span class="colon">:</span></dt>
-<dd class="field-even"><p>int</p>
-</dd>
-<dt class="field-odd">returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Transformed data array of the same shape as the input.</p>
-</dd>
-<dt class="field-even">rtype<span class="colon">:</span></dt>
-<dd class="field-even"><p>ndarray</p>
-</dd>
-</dl>
-</section>
-</dd></dl>
-
-</section>
-<section id="module-dither.updated">
-<span id="dither-updated-module"></span><h2>dither.updated module<a class="headerlink" href="#module-dither.updated" title="Link to this heading"></a></h2>
-<dl class="py function">
-<dt class="sig sig-object py" id="dither.updated.four1_backward">
-<span class="sig-prename descclassname"><span class="pre">dither.updated.</span></span><span class="sig-name descname"><span class="pre">four1_backward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a_hat</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dither/updated.html#four1_backward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dither.updated.four1_backward" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="dither.updated.four1_forward">
-<span class="sig-prename descclassname"><span class="pre">dither.updated.</span></span><span class="sig-name descname"><span class="pre">four1_forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dither/updated.html#four1_forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dither.updated.four1_forward" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="dither.updated.phase_shift">
-<span class="sig-prename descclassname"><span class="pre">dither.updated.</span></span><span class="sig-name descname"><span class="pre">phase_shift</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">A</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offsets</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dither/updated.html#phase_shift"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dither.updated.phase_shift" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="dither.updated.phase_updated">
-<span class="sig-prename descclassname"><span class="pre">dither.updated.</span></span><span class="sig-name descname"><span class="pre">phase_updated</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">A_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offsets</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">npos</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dither/updated.html#phase_updated"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dither.updated.phase_updated" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="dither.updated.real2dfft_backward">
-<span class="sig-prename descclassname"><span class="pre">dither.updated.</span></span><span class="sig-name descname"><span class="pre">real2dfft_backward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dither/updated.html#real2dfft_backward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dither.updated.real2dfft_backward" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="dither.updated.real2dfft_forward">
-<span class="sig-prename descclassname"><span class="pre">dither.updated.</span></span><span class="sig-name descname"><span class="pre">real2dfft_forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dither/updated.html#real2dfft_forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dither.updated.real2dfft_forward" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="dither.updated.realft_backward">
-<span class="sig-prename descclassname"><span class="pre">dither.updated.</span></span><span class="sig-name descname"><span class="pre">realft_backward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a_hat</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dither/updated.html#realft_backward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dither.updated.realft_backward" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="dither.updated.realft_forward">
-<span class="sig-prename descclassname"><span class="pre">dither.updated.</span></span><span class="sig-name descname"><span class="pre">realft_forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dither/updated.html#realft_forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dither.updated.realft_forward" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-</section>
-<section id="module-dither.utils">
-<span id="dither-utils-module"></span><h2>dither.utils module<a class="headerlink" href="#module-dither.utils" title="Link to this heading"></a></h2>
-<dl class="py function">
-<dt class="sig sig-object py" id="dither.utils.calculate_padding_radius">
-<span class="sig-prename descclassname"><span class="pre">dither.utils.</span></span><span class="sig-name descname"><span class="pre">calculate_padding_radius</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">centroids_int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dither/utils.html#calculate_padding_radius"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dither.utils.calculate_padding_radius" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="dither.utils.create_cutout_fits">
-<span class="sig-prename descclassname"><span class="pre">dither.utils.</span></span><span class="sig-name descname"><span class="pre">create_cutout_fits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fits_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cutout_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coord</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dither/utils.html#create_cutout_fits"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dither.utils.create_cutout_fits" title="Link to this definition"></a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>fits_path</strong> – string</p></li>
-<li><p><strong>output_path</strong> – string</p></li>
-<li><p><strong>coord</strong> – SkyCoord</p></li>
-<li><p><strong>radius</strong> – float (in arcsec)</p></li>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="dither_wrapper.html">Wrapper Module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="dither_wrapper.html#dither.wrapper.fft"><code class="docutils literal notranslate"><span class="pre">fft()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="dither_wrapper.html#dither.wrapper.ifft"><code class="docutils literal notranslate"><span class="pre">ifft()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="dither_wrapper.html#dither.wrapper.phase_shift"><code class="docutils literal notranslate"><span class="pre">phase_shift()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="dither_wrapper.html#dither.wrapper.set_dither_size"><code class="docutils literal notranslate"><span class="pre">set_dither_size()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="dither_wrapper.html#dither.wrapper.set_padding_size"><code class="docutils literal notranslate"><span class="pre">set_padding_size()</span></code></a></li>
 </ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="dither.utils.extract_central_region">
-<span class="sig-prename descclassname"><span class="pre">dither.utils.</span></span><span class="sig-name descname"><span class="pre">extract_central_region</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fraction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">center</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dither/utils.html#extract_central_region"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dither.utils.extract_central_region" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="dither.utils.get_brightest_pixel">
-<span class="sig-prename descclassname"><span class="pre">dither.utils.</span></span><span class="sig-name descname"><span class="pre">get_brightest_pixel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ymin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ymax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dither/utils.html#get_brightest_pixel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dither.utils.get_brightest_pixel" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="dither.utils.get_centroids_using_DAOStarFinder">
-<span class="sig-prename descclassname"><span class="pre">dither.utils.</span></span><span class="sig-name descname"><span class="pre">get_centroids_using_DAOStarFinder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">center_x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">center_y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dither/utils.html#get_centroids_using_DAOStarFinder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dither.utils.get_centroids_using_DAOStarFinder" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="dither.utils.get_centroids_using_centroid_com">
-<span class="sig-prename descclassname"><span class="pre">dither.utils.</span></span><span class="sig-name descname"><span class="pre">get_centroids_using_centroid_com</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">center_x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">center_y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dither/utils.html#get_centroids_using_centroid_com"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dither.utils.get_centroids_using_centroid_com" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="dither.utils.get_cosmic_ray_mask_without_AGN">
-<span class="sig-prename descclassname"><span class="pre">dither.utils.</span></span><span class="sig-name descname"><span class="pre">get_cosmic_ray_mask_without_AGN</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_connected_pixels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">12</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dither/utils.html#get_cosmic_ray_mask_without_AGN"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dither.utils.get_cosmic_ray_mask_without_AGN" title="Link to this definition"></a></dt>
-<dd><p>Detect cosmic rays in an image based on pixel differences from a smoothed version,
-while ignoring regions connected by more than a certain number of pixels.</p>
-<section id="parameters">
-<h3>Parameters:<a class="headerlink" href="#parameters" title="Link to this heading"></a></h3>
-<dl class="simple">
-<dt>image_data<span class="classifier">2D numpy array</span></dt><dd><p>The input image data.</p>
-</dd>
-<dt>kernel_size<span class="classifier">int, optional</span></dt><dd><p>Size of the box kernel for smoothing (default is 3x3).</p>
-</dd>
-<dt>sigma_threshold<span class="classifier">float, optional</span></dt><dd><p>Threshold for detecting cosmic rays in units of standard deviation (default is 5).</p>
-</dd>
-<dt>max_connected_pixels<span class="classifier">int, optional</span></dt><dd><p>Maximum number of connected pixels allowed for a region to be considered a cosmic ray (default is 10).</p>
-</dd>
-</dl>
-</section>
-<section id="returns">
-<h3>Returns:<a class="headerlink" href="#returns" title="Link to this heading"></a></h3>
-<dl class="simple">
-<dt>cosmic_ray_mask<span class="classifier">2D numpy array</span></dt><dd><p>A boolean mask where cosmic rays are detected (True means cosmic ray).</p>
-</dd>
-</dl>
-</section>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="dither.utils.get_pixel_center_coordinate">
-<span class="sig-prename descclassname"><span class="pre">dither.utils.</span></span><span class="sig-name descname"><span class="pre">get_pixel_center_coordinate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fits_path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dither/utils.html#get_pixel_center_coordinate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dither.utils.get_pixel_center_coordinate" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="dither.utils.get_pixel_center_from_array">
-<span class="sig-prename descclassname"><span class="pre">dither.utils.</span></span><span class="sig-name descname"><span class="pre">get_pixel_center_from_array</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dither/utils.html#get_pixel_center_from_array"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dither.utils.get_pixel_center_from_array" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="dither.utils.get_power_spectrum">
-<span class="sig-prename descclassname"><span class="pre">dither.utils.</span></span><span class="sig-name descname"><span class="pre">get_power_spectrum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fft_result</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dither/utils.html#get_power_spectrum"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dither.utils.get_power_spectrum" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="dither.utils.get_power_spectrum_from_realfft2d">
-<span class="sig-prename descclassname"><span class="pre">dither.utils.</span></span><span class="sig-name descname"><span class="pre">get_power_spectrum_from_realfft2d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Atotal</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dither/utils.html#get_power_spectrum_from_realfft2d"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dither.utils.get_power_spectrum_from_realfft2d" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="dither.utils.norm">
-<span class="sig-prename descclassname"><span class="pre">dither.utils.</span></span><span class="sig-name descname"><span class="pre">norm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">z</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dither/utils.html#norm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dither.utils.norm" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="dither.utils.pad_image_with_centroid">
-<span class="sig-prename descclassname"><span class="pre">dither.utils.</span></span><span class="sig-name descname"><span class="pre">pad_image_with_centroid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pad</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">centroid_int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dither/utils.html#pad_image_with_centroid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dither.utils.pad_image_with_centroid" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-</section>
-<section id="module-dither.wrapper">
-<span id="dither-wrapper-module"></span><h2>dither.wrapper module<a class="headerlink" href="#module-dither.wrapper" title="Link to this heading"></a></h2>
-<dl class="py function">
-<dt class="sig sig-object py" id="dither.wrapper.fft">
-<span class="sig-prename descclassname"><span class="pre">dither.wrapper.</span></span><span class="sig-name descname"><span class="pre">fft</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dither/wrapper.html#fft"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dither.wrapper.fft" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="dither.wrapper.ifft">
-<span class="sig-prename descclassname"><span class="pre">dither.wrapper.</span></span><span class="sig-name descname"><span class="pre">ifft</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_hat</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dither/wrapper.html#ifft"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dither.wrapper.ifft" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="dither.wrapper.phase_shift">
-<span class="sig-prename descclassname"><span class="pre">dither.wrapper.</span></span><span class="sig-name descname"><span class="pre">phase_shift</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">A</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offsets</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dither/wrapper.html#phase_shift"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dither.wrapper.phase_shift" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="dither.wrapper.set_dither_size">
-<span class="sig-prename descclassname"><span class="pre">dither.wrapper.</span></span><span class="sig-name descname"><span class="pre">set_dither_size</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">factor</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dither/wrapper.html#set_dither_size"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dither.wrapper.set_dither_size" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="dither.wrapper.set_padding_size">
-<span class="sig-prename descclassname"><span class="pre">dither.wrapper.</span></span><span class="sig-name descname"><span class="pre">set_padding_size</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">NC</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">NR</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dither/wrapper.html#set_padding_size"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dither.wrapper.set_padding_size" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-</section>
+</li>
+</ul>
+</div>
 </section>
 
 
@@ -509,6 +140,7 @@ while ignoring regions connected by more than a certain number of pixels.</p>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="tutorial.html" class="btn btn-neutral float-left" title="Tutorial" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="dither_legacy.html" class="btn btn-neutral float-right" title="Legacy Module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

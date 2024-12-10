@@ -44,7 +44,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../introduction.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tutorial.html">Tutorial</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../dither.html">dither package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dither.html">API Documentation</a></li>
 </ul>
 
         </div>
@@ -76,7 +76,7 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 <div class="viewcode-block" id="four1_forward">
-<a class="viewcode-back" href="../../dither.html#dither.updated.four1_forward">[docs]</a>
+<a class="viewcode-back" href="../../dither_updated.html#dither.updated.four1_forward">[docs]</a>
 <span class="k">def</span> <span class="nf">four1_forward</span><span class="p">(</span><span class="n">a</span><span class="p">):</span> 
     <span class="n">a_complex</span> <span class="o">=</span> <span class="n">a</span><span class="p">[::</span><span class="mi">2</span><span class="p">]</span><span class="o">+</span><span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">::</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="mi">1</span><span class="n">j</span>
     <span class="n">a_hat_complex</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fft</span><span class="p">(</span><span class="n">a_complex</span><span class="p">)</span>
@@ -91,7 +91,7 @@
 
 
 <div class="viewcode-block" id="four1_backward">
-<a class="viewcode-back" href="../../dither.html#dither.updated.four1_backward">[docs]</a>
+<a class="viewcode-back" href="../../dither_updated.html#dither.updated.four1_backward">[docs]</a>
 <span class="k">def</span> <span class="nf">four1_backward</span><span class="p">(</span><span class="n">a_hat</span><span class="p">):</span> 
     <span class="n">a_hat_real</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">a_hat</span><span class="p">)</span><span class="o">//</span><span class="mi">2</span><span class="p">)</span>
     <span class="n">a_hat_imag</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">a_hat</span><span class="p">)</span><span class="o">//</span><span class="mi">2</span><span class="p">)</span>
@@ -109,7 +109,7 @@
 
 
 <div class="viewcode-block" id="realft_forward">
-<a class="viewcode-back" href="../../dither.html#dither.updated.realft_forward">[docs]</a>
+<a class="viewcode-back" href="../../dither_updated.html#dither.updated.realft_forward">[docs]</a>
 <span class="k">def</span> <span class="nf">realft_forward</span><span class="p">(</span><span class="n">a</span><span class="p">):</span> 
     <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
     <span class="n">nn</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="o">-</span> <span class="mi">2</span><span class="p">)</span><span class="o">//</span><span class="mi">2</span>
@@ -123,7 +123,7 @@
 
 
 <div class="viewcode-block" id="realft_backward">
-<a class="viewcode-back" href="../../dither.html#dither.updated.realft_backward">[docs]</a>
+<a class="viewcode-back" href="../../dither_updated.html#dither.updated.realft_backward">[docs]</a>
 <span class="k">def</span> <span class="nf">realft_backward</span><span class="p">(</span><span class="n">a_hat</span><span class="p">):</span> 
     <span class="n">nn</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">a_hat</span><span class="p">)</span> <span class="o">-</span> <span class="mi">2</span><span class="p">)</span><span class="o">//</span><span class="mi">2</span>
     <span class="n">a_hat_real</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">nn</span><span class="o">*</span><span class="mi">2</span><span class="p">)</span>
@@ -141,7 +141,7 @@
 
 
 <div class="viewcode-block" id="real2dfft_forward">
-<a class="viewcode-back" href="../../dither.html#dither.updated.real2dfft_forward">[docs]</a>
+<a class="viewcode-back" href="../../dither_updated.html#dither.updated.real2dfft_forward">[docs]</a>
 <span class="k">def</span> <span class="nf">real2dfft_forward</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
     <span class="n">nc</span><span class="p">,</span> <span class="n">nr</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span>
     <span class="n">data_hat</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
@@ -158,7 +158,7 @@
 
 
 <div class="viewcode-block" id="real2dfft_backward">
-<a class="viewcode-back" href="../../dither.html#dither.updated.real2dfft_backward">[docs]</a>
+<a class="viewcode-back" href="../../dither_updated.html#dither.updated.real2dfft_backward">[docs]</a>
 <span class="k">def</span> <span class="nf">real2dfft_backward</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
     <span class="n">nc</span><span class="p">,</span> <span class="n">nr</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span>
     <span class="n">data_hat</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
@@ -191,7 +191,7 @@
 <span class="n">set_padding_size</span><span class="p">(</span><span class="n">NC</span><span class="p">,</span> <span class="n">NR</span><span class="p">)</span>
 
 <div class="viewcode-block" id="phase_updated">
-<a class="viewcode-back" href="../../dither.html#dither.updated.phase_updated">[docs]</a>
+<a class="viewcode-back" href="../../dither_updated.html#dither.updated.phase_updated">[docs]</a>
 <span class="k">def</span> <span class="nf">phase_updated</span><span class="p">(</span><span class="n">A_in</span><span class="p">,</span> <span class="n">offsets</span><span class="p">,</span> <span class="n">npos</span><span class="p">):</span>
     <span class="n">A</span> <span class="o">=</span> <span class="n">A_in</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
     <span class="n">phix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">NSTMAX</span><span class="p">)</span>
@@ -401,7 +401,7 @@
 
 
 <div class="viewcode-block" id="phase_shift">
-<a class="viewcode-back" href="../../dither.html#dither.updated.phase_shift">[docs]</a>
+<a class="viewcode-back" href="../../dither_updated.html#dither.updated.phase_shift">[docs]</a>
 <span class="k">def</span> <span class="nf">phase_shift</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">offsets</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">verbose</span><span class="p">:</span> 
         <span class="n">stdout_backup</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span>
