@@ -33,9 +33,10 @@ html_theme = 'sphinx_rtd_theme'
 html_static_path = ['_static']
 
 
+
+# Other configuration
+
 import os
 import sys
 sys.path.insert(0, os.path.abspath('../..'))
-
-html_copy_source = True
-html_show_sourcelink = True
+autodoc_mock_imports = ['numpy', 'astropy', 'scipy', 'photutils']
