@@ -1,3 +1,41 @@
+"""
+legacy.py
+=========
+
+This module contains Python translations of functions from the Fortran77 code
+described in Luer's (1999) paper. These functions implement advanced Fourier
+transform techniques and phase calculations for astronomical image processing.
+
+Reference:
+----------
+Luer, T. M. (1999). Combining Undersampled Dithered Images.
+
+Key Features:
+-------------
+- Phase adjustment and coefficient calculations using the `phase` function.
+- 1D complex-to-complex FFT using `four1`.
+- Real-to-complex and complex-to-real FFT using `realft`.
+- 2D FFT transformations using `real2dfft`.
+
+Assumptions and Constraints:
+----------------------------
+- The code assumes compatibility with numpy arrays for numerical computations.
+- Some algorithmic logic and constants (e.g., NSTMAX, NDIV) are directly ported
+  from the Fortran77 code.
+
+Example Usage:
+--------------
+```python
+import legacy
+
+# Example: Perform phase adjustment
+input_array = ...  # Your 2D numpy array
+adjusted_array = legacy.phase(input_array, nrow=256, ncol=256, shift=True, DR=0.1, DC=0.2, offsets=[[0, 0, 1]], npos=1)
+
+# Example: 1D FFT
+fft_result = legacy.four1(data, nn=128, isign=1)
+"""
+
 import numpy as np
 
 PI = np.pi
@@ -11,6 +49,33 @@ NSUB = 2
 # TODO: add well docmentation like the original files
 
 def phase(A_in, nrow, ncol, shift, DR, DC, offsets, npos):
+    """
+    Apply phase shifts and calculate coefficients for Fourier-based image transformations.
+
+    Parameters
+    ----------
+    A_in : ndarray
+        Input 2D array representing the Fourier-transformed data.
+    nrow : int
+        Number of rows in the data.
+    ncol : int
+        Number of columns in the data.
+    shift : bool
+        Whether to apply a global phase shift based on `DR` and `DC`.
+    DR : float
+        Row shift factor.
+    DC : float
+        Column shift factor.
+    offsets : ndarray
+        Array of offsets and weights, with shape (n, 3), where the columns are x-offset, y-offset, and weight.
+    npos : int
+        Index of the position for which the coefficients are computed.
+
+    Returns
+    -------
+    ndarray
+        Modified 2D array after phase adjustment and transformation.
+    """
     # TODO: check if they are all in use
     A = A_in.copy()
     phix = np.zeros(NSTMAX)
@@ -332,6 +397,28 @@ def phase(A_in, nrow, ncol, shift, DR, DC, offsets, npos):
     return A
 
 def four1(data, nn, isign):
+    """
+    Perform a 1D complex-to-complex Fast Fourier Transform (FFT).
+
+    Reference:
+    ----------
+    W.H. Press et.al. "Numerical Recipes" (JJGG).   
+
+
+    Parameters
+    ----------
+    data : ndarray
+        Input array of length `2 * nn`, alternating real and imaginary components.
+    nn : int
+        Number of complex elements in the data.
+    isign : int
+        Sign of the exponent in the FFT; `1` for forward transform, `-1` for inverse transform.
+
+    Returns
+    -------
+    ndarray
+        Transformed data array of the same shape as the input.
+    """
     # print('four1', data.size, nn, data)
     n = 2*nn
     data = data.copy()
@@ -376,6 +463,27 @@ def four1(data, nn, isign):
     return data
 
 def realft(data, n, isign):
+    """
+    Perform a real-to-complex or complex-to-real FFT transformation.
+
+    Reference:
+    ----------
+    W.H. Press et.al. "Numerical Recipes" (JJGG).   
+
+    Parameters
+    ----------
+    data : ndarray
+        Input array of length `2 * n`.
+    n : int
+        Number of real elements in the data.
+    isign : int
+        Sign of the exponent in the FFT; `1` for forward transform, `-1` for inverse transform.
+
+    Returns
+    -------
+    ndarray
+        Transformed data array of the same shape as the input.
+    """
     # print('realft', data.size, n)
     theta = 2*np.pi/(2*n)
     data = data.copy()
@@ -418,6 +526,39 @@ def realft(data, n, isign):
     return data
 
 def real2dfft(a, nra, nca, b, nrb, ncb, isign, work, onedim=False):
+    """
+    Perform a 2D real-to-complex or complex-to-real FFT transformation.
+
+    Reference:
+    ----------
+    W.H. Press et.al. "Numerical Recipes" (JJGG).   
+
+    Parameters
+    ----------
+    a : ndarray
+        Input/output array for the transformation.
+    nra : int
+        Number of rows in the input array.
+    nca : int
+        Number of columns in the input array.
+    b : ndarray
+        Auxiliary array for intermediate transformations.
+    nrb : int
+        Number of rows in the auxiliary array.
+    ncb : int
+        Number of columns in the auxiliary array.
+    isign : int
+        Sign of the exponent in the FFT; `1` for forward transform, `-1` for inverse transform.
+    work : ndarray
+        Temporary work array for intermediate calculations.
+    onedim : bool, optional
+        Whether to perform a 1D FFT along the first dimension only. Default is False.
+
+    Returns
+    -------
+    ndarray
+        Transformed data array.
+    """
     a = a.copy()
     b = b.copy()
     work = np.zeros((2, max(nra, nrb)))
