@@ -39,4 +39,4 @@ html_static_path = ['_static']
 import os
 import sys
 sys.path.insert(0, os.path.abspath('../..'))
-autodoc_mock_imports = ['numpy', 'astropy', 'scipy', 'photutils']
+autodoc_mock_imports = ['astropy', 'scipy', 'photutils']
