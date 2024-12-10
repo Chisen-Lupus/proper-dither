@@ -49,6 +49,13 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">dither package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#submodules">Submodules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-dither.legacy">dither.legacy module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#legacy-py">legacy.py</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#reference">Reference:</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#key-features">Key Features:</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#assumptions-and-constraints">Assumptions and Constraints:</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#example-usage">Example Usage:</a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="#dither.legacy.four1"><code class="docutils literal notranslate"><span class="pre">four1()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#dither.legacy.phase"><code class="docutils literal notranslate"><span class="pre">phase()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#dither.legacy.real2dfft"><code class="docutils literal notranslate"><span class="pre">real2dfft()</span></code></a></li>
@@ -126,25 +133,212 @@
 </section>
 <section id="module-dither.legacy">
 <span id="dither-legacy-module"></span><h2>dither.legacy module<a class="headerlink" href="#module-dither.legacy" title="Link to this heading"></a></h2>
+<section id="legacy-py">
+<h3>legacy.py<a class="headerlink" href="#legacy-py" title="Link to this heading"></a></h3>
+<p>This module contains Python translations of functions from the Fortran77 code
+described in Luer’s (1999) paper. These functions implement advanced Fourier
+transform techniques and phase calculations for astronomical image processing.</p>
+<section id="reference">
+<h4>Reference:<a class="headerlink" href="#reference" title="Link to this heading"></a></h4>
+<p>Luer, T. M. (1999). Combining Undersampled Dithered Images.</p>
+</section>
+<section id="key-features">
+<h4>Key Features:<a class="headerlink" href="#key-features" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p>Phase adjustment and coefficient calculations using the <cite>phase</cite> function.</p></li>
+<li><p>1D complex-to-complex FFT using <cite>four1</cite>.</p></li>
+<li><p>Real-to-complex and complex-to-real FFT using <cite>realft</cite>.</p></li>
+<li><p>2D FFT transformations using <cite>real2dfft</cite>.</p></li>
+</ul>
+</section>
+<section id="assumptions-and-constraints">
+<h4>Assumptions and Constraints:<a class="headerlink" href="#assumptions-and-constraints" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p>The code assumes compatibility with numpy arrays for numerical computations.</p></li>
+<li><p>Some algorithmic logic and constants (e.g., NSTMAX, NDIV) are directly ported
+from the Fortran77 code.</p></li>
+</ul>
+</section>
+<section id="example-usage">
+<h4>Example Usage:<a class="headerlink" href="#example-usage" title="Link to this heading"></a></h4>
+<p><a href="#id1"><span class="problematic" id="id2">``</span></a><a href="#id3"><span class="problematic" id="id4">`</span></a>python
+import legacy</p>
+<p># Example: Perform phase adjustment
+input_array = …  # Your 2D numpy array
+adjusted_array = legacy.phase(input_array, nrow=256, ncol=256, shift=True, DR=0.1, DC=0.2, offsets=[[0, 0, 1]], npos=1)</p>
+<p># Example: 1D FFT
+fft_result = legacy.four1(data, nn=128, isign=1)</p>
+</section>
+</section>
 <dl class="py function">
 <dt class="sig sig-object py" id="dither.legacy.four1">
 <span class="sig-prename descclassname"><span class="pre">dither.legacy.</span></span><span class="sig-name descname"><span class="pre">four1</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">isign</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dither/legacy.html#four1"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dither.legacy.four1" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Perform a 1D complex-to-complex Fast Fourier Transform (FFT).</p>
+<section id="id5">
+<h3>Reference:<a class="headerlink" href="#id5" title="Link to this heading"></a></h3>
+<p>W.H. Press et.al. “Numerical Recipes” (JJGG).</p>
+<dl class="field-list simple">
+<dt class="field-odd">param data<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Input array of length <cite>2 * nn</cite>, alternating real and imaginary components.</p>
+</dd>
+<dt class="field-even">type data<span class="colon">:</span></dt>
+<dd class="field-even"><p>ndarray</p>
+</dd>
+<dt class="field-odd">param nn<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Number of complex elements in the data.</p>
+</dd>
+<dt class="field-even">type nn<span class="colon">:</span></dt>
+<dd class="field-even"><p>int</p>
+</dd>
+<dt class="field-odd">param isign<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Sign of the exponent in the FFT; <cite>1</cite> for forward transform, <cite>-1</cite> for inverse transform.</p>
+</dd>
+<dt class="field-even">type isign<span class="colon">:</span></dt>
+<dd class="field-even"><p>int</p>
+</dd>
+<dt class="field-odd">returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Transformed data array of the same shape as the input.</p>
+</dd>
+<dt class="field-even">rtype<span class="colon">:</span></dt>
+<dd class="field-even"><p>ndarray</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="dither.legacy.phase">
 <span class="sig-prename descclassname"><span class="pre">dither.legacy.</span></span><span class="sig-name descname"><span class="pre">phase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">A_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nrow</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ncol</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shift</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">DR</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">DC</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offsets</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">npos</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dither/legacy.html#phase"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dither.legacy.phase" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Apply phase shifts and calculate coefficients for Fourier-based image transformations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>A_in</strong> (<em>ndarray</em>) – Input 2D array representing the Fourier-transformed data.</p></li>
+<li><p><strong>nrow</strong> (<em>int</em>) – Number of rows in the data.</p></li>
+<li><p><strong>ncol</strong> (<em>int</em>) – Number of columns in the data.</p></li>
+<li><p><strong>shift</strong> (<em>bool</em>) – Whether to apply a global phase shift based on <cite>DR</cite> and <cite>DC</cite>.</p></li>
+<li><p><strong>DR</strong> (<em>float</em>) – Row shift factor.</p></li>
+<li><p><strong>DC</strong> (<em>float</em>) – Column shift factor.</p></li>
+<li><p><strong>offsets</strong> (<em>ndarray</em>) – Array of offsets and weights, with shape (n, 3), where the columns are x-offset, y-offset, and weight.</p></li>
+<li><p><strong>npos</strong> (<em>int</em>) – Index of the position for which the coefficients are computed.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Modified 2D array after phase adjustment and transformation.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ndarray</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="dither.legacy.real2dfft">
 <span class="sig-prename descclassname"><span class="pre">dither.legacy.</span></span><span class="sig-name descname"><span class="pre">real2dfft</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nra</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nca</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nrb</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ncb</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">isign</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">work</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">onedim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dither/legacy.html#real2dfft"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dither.legacy.real2dfft" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Perform a 2D real-to-complex or complex-to-real FFT transformation.</p>
+<section id="id6">
+<h3>Reference:<a class="headerlink" href="#id6" title="Link to this heading"></a></h3>
+<p>W.H. Press et.al. “Numerical Recipes” (JJGG).</p>
+<dl class="field-list simple">
+<dt class="field-odd">param a<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Input/output array for the transformation.</p>
+</dd>
+<dt class="field-even">type a<span class="colon">:</span></dt>
+<dd class="field-even"><p>ndarray</p>
+</dd>
+<dt class="field-odd">param nra<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Number of rows in the input array.</p>
+</dd>
+<dt class="field-even">type nra<span class="colon">:</span></dt>
+<dd class="field-even"><p>int</p>
+</dd>
+<dt class="field-odd">param nca<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Number of columns in the input array.</p>
+</dd>
+<dt class="field-even">type nca<span class="colon">:</span></dt>
+<dd class="field-even"><p>int</p>
+</dd>
+<dt class="field-odd">param b<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Auxiliary array for intermediate transformations.</p>
+</dd>
+<dt class="field-even">type b<span class="colon">:</span></dt>
+<dd class="field-even"><p>ndarray</p>
+</dd>
+<dt class="field-odd">param nrb<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Number of rows in the auxiliary array.</p>
+</dd>
+<dt class="field-even">type nrb<span class="colon">:</span></dt>
+<dd class="field-even"><p>int</p>
+</dd>
+<dt class="field-odd">param ncb<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Number of columns in the auxiliary array.</p>
+</dd>
+<dt class="field-even">type ncb<span class="colon">:</span></dt>
+<dd class="field-even"><p>int</p>
+</dd>
+<dt class="field-odd">param isign<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Sign of the exponent in the FFT; <cite>1</cite> for forward transform, <cite>-1</cite> for inverse transform.</p>
+</dd>
+<dt class="field-even">type isign<span class="colon">:</span></dt>
+<dd class="field-even"><p>int</p>
+</dd>
+<dt class="field-odd">param work<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Temporary work array for intermediate calculations.</p>
+</dd>
+<dt class="field-even">type work<span class="colon">:</span></dt>
+<dd class="field-even"><p>ndarray</p>
+</dd>
+<dt class="field-odd">param onedim<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Whether to perform a 1D FFT along the first dimension only. Default is False.</p>
+</dd>
+<dt class="field-even">type onedim<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool, optional</p>
+</dd>
+<dt class="field-odd">returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Transformed data array.</p>
+</dd>
+<dt class="field-even">rtype<span class="colon">:</span></dt>
+<dd class="field-even"><p>ndarray</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="dither.legacy.realft">
 <span class="sig-prename descclassname"><span class="pre">dither.legacy.</span></span><span class="sig-name descname"><span class="pre">realft</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">isign</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dither/legacy.html#realft"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dither.legacy.realft" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Perform a real-to-complex or complex-to-real FFT transformation.</p>
+<section id="id7">
+<h3>Reference:<a class="headerlink" href="#id7" title="Link to this heading"></a></h3>
+<p>W.H. Press et.al. “Numerical Recipes” (JJGG).</p>
+<dl class="field-list simple">
+<dt class="field-odd">param data<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Input array of length <cite>2 * n</cite>.</p>
+</dd>
+<dt class="field-even">type data<span class="colon">:</span></dt>
+<dd class="field-even"><p>ndarray</p>
+</dd>
+<dt class="field-odd">param n<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Number of real elements in the data.</p>
+</dd>
+<dt class="field-even">type n<span class="colon">:</span></dt>
+<dd class="field-even"><p>int</p>
+</dd>
+<dt class="field-odd">param isign<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Sign of the exponent in the FFT; <cite>1</cite> for forward transform, <cite>-1</cite> for inverse transform.</p>
+</dd>
+<dt class="field-even">type isign<span class="colon">:</span></dt>
+<dd class="field-even"><p>int</p>
+</dd>
+<dt class="field-odd">returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Transformed data array of the same shape as the input.</p>
+</dd>
+<dt class="field-even">rtype<span class="colon">:</span></dt>
+<dd class="field-even"><p>ndarray</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
 
 </section>
 <section id="module-dither.updated">
