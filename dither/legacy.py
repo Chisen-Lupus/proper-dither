@@ -1,37 +1,40 @@
 """
 This module contains Python translations of functions from the Fortran77 code
-described in Luer's (1999) paper. These functions implement advanced Fourier
+described in Lauer's (1999) paper. These functions implement advanced Fourier
 transform techniques and phase calculations for astronomical image processing.
 
-Reference:
-----------
-Luer, T. M. (1999). Combining Undersampled Dithered Images.
+Reference
+---------
+Lauer, T. R. (1999). Combining Undersampled Dithered Images.
 
-Key Features:
--------------
+Key Features
+------------
 - Phase adjustment and coefficient calculations using the `phase` function.
-- 1D complex-to-complex FFT using `four1`.
-- Real-to-complex and complex-to-real FFT using `realft`.
-- 2D FFT transformations using `real2dfft`.
+- 1D complex-to-complex FFT using ``four1``.
+- Real-to-complex and complex-to-real FFT using ``realft``.
+- 2D FFT transformations using ``real2dfft``.
 
-Assumptions and Constraints:
-----------------------------
-- The code assumes compatibility with numpy arrays for numerical computations.
-- Some algorithmic logic and constants (e.g., NSTMAX, NDIV) are directly ported
-  from the Fortran77 code.
+Assumptions and Constraints
+---------------------------
+- The code assumes compatibility with NumPy arrays for numerical computations.
+- Some algorithmic logic and constants (e.g., `NSTMAX`, `NDIV`) are directly
+  ported from the Fortran77 code.
 
-Example Usage:
---------------
-```python
-import legacy
+Example Usage
+-------------
+.. code-block:: python
 
-# Example: Perform phase adjustment
-input_array = ...  # Your 2D numpy array
-adjusted_array = legacy.phase(input_array, nrow=256, ncol=256, shift=True, DR=0.1, DC=0.2, offsets=[[0, 0, 1]], npos=1)
+    import legacy
 
-# Example: 1D FFT
-fft_result = legacy.four1(data, nn=128, isign=1)
-```
+    # Example: Perform phase adjustment
+    input_array = ...  # Your 2D numpy array
+    adjusted_array = legacy.phase(
+        input_array, nrow=256, ncol=256, shift=True, DR=0.1, DC=0.2, 
+        offsets=[[0, 0, 1]], npos=1
+    )
+
+    # Example: 1D FFT
+    fft_result = legacy.four1(data, nn=128, isign=1)
 """
 
 import numpy as np
@@ -398,11 +401,6 @@ def four1(data, nn, isign):
     """
     Perform a 1D complex-to-complex Fast Fourier Transform (FFT).
 
-    Reference:
-    ----------
-    W.H. Press et.al. "Numerical Recipes" (JJGG).   
-
-
     Parameters
     ----------
     data : ndarray
@@ -416,6 +414,10 @@ def four1(data, nn, isign):
     -------
     ndarray
         Transformed data array of the same shape as the input.
+
+    References
+    ----------
+    W.H. Press et al., "Numerical Recipes" (JJGG).
     """
     # print('four1', data.size, nn, data)
     n = 2*nn
@@ -464,10 +466,6 @@ def realft(data, n, isign):
     """
     Perform a real-to-complex or complex-to-real FFT transformation.
 
-    Reference:
-    ----------
-    W.H. Press et.al. "Numerical Recipes" (JJGG).   
-
     Parameters
     ----------
     data : ndarray
@@ -481,6 +479,10 @@ def realft(data, n, isign):
     -------
     ndarray
         Transformed data array of the same shape as the input.
+
+    References
+    ----------
+    W.H. Press et al., "Numerical Recipes" (JJGG).
     """
     # print('realft', data.size, n)
     theta = 2*np.pi/(2*n)
@@ -527,10 +529,6 @@ def real2dfft(a, nra, nca, b, nrb, ncb, isign, work, onedim=False):
     """
     Perform a 2D real-to-complex or complex-to-real FFT transformation.
 
-    Reference:
-    ----------
-    W.H. Press et.al. "Numerical Recipes" (JJGG).   
-
     Parameters
     ----------
     a : ndarray
@@ -556,6 +554,10 @@ def real2dfft(a, nra, nca, b, nrb, ncb, isign, work, onedim=False):
     -------
     ndarray
         Transformed data array.
+
+    References
+    ----------
+    W.H. Press et al., "Numerical Recipes" (JJGG).
     """
     a = a.copy()
     b = b.copy()
