@@ -47,15 +47,11 @@
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">dither package</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#submodules">Submodules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-dither.legacy">dither.legacy module</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#legacy-py">legacy.py</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#reference">Reference:</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#key-features">Key Features:</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#assumptions-and-constraints">Assumptions and Constraints:</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#example-usage">Example Usage:</a></li>
-</ul>
-</li>
+<li class="toctree-l3"><a class="reference internal" href="#reference">Reference:</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#key-features">Key Features:</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#assumptions-and-constraints">Assumptions and Constraints:</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#example-usage">Example Usage:</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#dither.legacy.four1"><code class="docutils literal notranslate"><span class="pre">four1()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#dither.legacy.phase"><code class="docutils literal notranslate"><span class="pre">phase()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#dither.legacy.real2dfft"><code class="docutils literal notranslate"><span class="pre">real2dfft()</span></code></a></li>
@@ -97,7 +93,6 @@
 <li class="toctree-l3"><a class="reference internal" href="#dither.wrapper.set_padding_size"><code class="docutils literal notranslate"><span class="pre">set_padding_size()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#module-dither">Module contents</a></li>
 </ul>
 </li>
 </ul>
@@ -128,22 +123,17 @@
              
   <section id="dither-package">
 <h1>dither package<a class="headerlink" href="#dither-package" title="Link to this heading"></a></h1>
-<section id="submodules">
-<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
-</section>
 <section id="module-dither.legacy">
 <span id="dither-legacy-module"></span><h2>dither.legacy module<a class="headerlink" href="#module-dither.legacy" title="Link to this heading"></a></h2>
-<section id="legacy-py">
-<h3>legacy.py<a class="headerlink" href="#legacy-py" title="Link to this heading"></a></h3>
 <p>This module contains Python translations of functions from the Fortran77 code
 described in Luer’s (1999) paper. These functions implement advanced Fourier
 transform techniques and phase calculations for astronomical image processing.</p>
 <section id="reference">
-<h4>Reference:<a class="headerlink" href="#reference" title="Link to this heading"></a></h4>
+<h3>Reference:<a class="headerlink" href="#reference" title="Link to this heading"></a></h3>
 <p>Luer, T. M. (1999). Combining Undersampled Dithered Images.</p>
 </section>
 <section id="key-features">
-<h4>Key Features:<a class="headerlink" href="#key-features" title="Link to this heading"></a></h4>
+<h3>Key Features:<a class="headerlink" href="#key-features" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p>Phase adjustment and coefficient calculations using the <cite>phase</cite> function.</p></li>
 <li><p>1D complex-to-complex FFT using <cite>four1</cite>.</p></li>
@@ -152,7 +142,7 @@ transform techniques and phase calculations for astronomical image processing.</
 </ul>
 </section>
 <section id="assumptions-and-constraints">
-<h4>Assumptions and Constraints:<a class="headerlink" href="#assumptions-and-constraints" title="Link to this heading"></a></h4>
+<h3>Assumptions and Constraints:<a class="headerlink" href="#assumptions-and-constraints" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p>The code assumes compatibility with numpy arrays for numerical computations.</p></li>
 <li><p>Some algorithmic logic and constants (e.g., NSTMAX, NDIV) are directly ported
@@ -160,22 +150,22 @@ from the Fortran77 code.</p></li>
 </ul>
 </section>
 <section id="example-usage">
-<h4>Example Usage:<a class="headerlink" href="#example-usage" title="Link to this heading"></a></h4>
+<h3>Example Usage:<a class="headerlink" href="#example-usage" title="Link to this heading"></a></h3>
 <p><a href="#id1"><span class="problematic" id="id2">``</span></a><a href="#id3"><span class="problematic" id="id4">`</span></a>python
 import legacy</p>
 <p># Example: Perform phase adjustment
 input_array = …  # Your 2D numpy array
 adjusted_array = legacy.phase(input_array, nrow=256, ncol=256, shift=True, DR=0.1, DC=0.2, offsets=[[0, 0, 1]], npos=1)</p>
 <p># Example: 1D FFT
-fft_result = legacy.four1(data, nn=128, isign=1)</p>
-</section>
+fft_result = legacy.four1(data, nn=128, isign=1)
+<a href="#id5"><span class="problematic" id="id6">``</span></a><a href="#id7"><span class="problematic" id="id8">`</span></a></p>
 </section>
 <dl class="py function">
 <dt class="sig sig-object py" id="dither.legacy.four1">
 <span class="sig-prename descclassname"><span class="pre">dither.legacy.</span></span><span class="sig-name descname"><span class="pre">four1</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">isign</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dither/legacy.html#four1"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dither.legacy.four1" title="Link to this definition"></a></dt>
 <dd><p>Perform a 1D complex-to-complex Fast Fourier Transform (FFT).</p>
-<section id="id5">
-<h3>Reference:<a class="headerlink" href="#id5" title="Link to this heading"></a></h3>
+<section id="id9">
+<h3>Reference:<a class="headerlink" href="#id9" title="Link to this heading"></a></h3>
 <p>W.H. Press et.al. “Numerical Recipes” (JJGG).</p>
 <dl class="field-list simple">
 <dt class="field-odd">param data<span class="colon">:</span></dt>
@@ -236,8 +226,8 @@ fft_result = legacy.four1(data, nn=128, isign=1)</p>
 <dt class="sig sig-object py" id="dither.legacy.real2dfft">
 <span class="sig-prename descclassname"><span class="pre">dither.legacy.</span></span><span class="sig-name descname"><span class="pre">real2dfft</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nra</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nca</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nrb</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ncb</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">isign</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">work</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">onedim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dither/legacy.html#real2dfft"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dither.legacy.real2dfft" title="Link to this definition"></a></dt>
 <dd><p>Perform a 2D real-to-complex or complex-to-real FFT transformation.</p>
-<section id="id6">
-<h3>Reference:<a class="headerlink" href="#id6" title="Link to this heading"></a></h3>
+<section id="id10">
+<h3>Reference:<a class="headerlink" href="#id10" title="Link to this heading"></a></h3>
 <p>W.H. Press et.al. “Numerical Recipes” (JJGG).</p>
 <dl class="field-list simple">
 <dt class="field-odd">param a<span class="colon">:</span></dt>
@@ -308,8 +298,8 @@ fft_result = legacy.four1(data, nn=128, isign=1)</p>
 <dt class="sig sig-object py" id="dither.legacy.realft">
 <span class="sig-prename descclassname"><span class="pre">dither.legacy.</span></span><span class="sig-name descname"><span class="pre">realft</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">isign</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dither/legacy.html#realft"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dither.legacy.realft" title="Link to this definition"></a></dt>
 <dd><p>Perform a real-to-complex or complex-to-real FFT transformation.</p>
-<section id="id7">
-<h3>Reference:<a class="headerlink" href="#id7" title="Link to this heading"></a></h3>
+<section id="id11">
+<h3>Reference:<a class="headerlink" href="#id11" title="Link to this heading"></a></h3>
 <p>W.H. Press et.al. “Numerical Recipes” (JJGG).</p>
 <dl class="field-list simple">
 <dt class="field-odd">param data<span class="colon">:</span></dt>
@@ -511,9 +501,6 @@ while ignoring regions connected by more than a certain number of pixels.</p>
 <span class="sig-prename descclassname"><span class="pre">dither.wrapper.</span></span><span class="sig-name descname"><span class="pre">set_padding_size</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">NC</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">NR</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dither/wrapper.html#set_padding_size"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dither.wrapper.set_padding_size" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
-</section>
-<section id="module-dither">
-<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-dither" title="Link to this heading"></a></h2>
 </section>
 </section>
 
