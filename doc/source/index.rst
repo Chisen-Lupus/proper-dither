@@ -1,18 +1,26 @@
-.. Proper Dither documentation master file, created by
-   sphinx-quickstart on Tue Dec 10 00:42:33 2024.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+.. proper-dither documentation master file
 
-Proper Dither documentation
-===========================
+Welcome to proper-dither's documentation!
+==========================================
 
-Add your content using ``reStructuredText`` syntax. See the
-`reStructuredText <https://www.sphinx-doc.org/en/master/usage/restructuredtext/index.html>`_
-documentation for details.
+A code to execute a proper coaddition method of undersampled dithered images (Lauer et al.).
 
+Contents:
+---------
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :caption: Documentation
 
-   modules
+   introduction
+   installation
+   tutorial
+   dither
+   api
+
+Indices and tables
+==================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`
