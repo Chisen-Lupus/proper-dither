@@ -1,6 +1,8 @@
 Installation
 ============
 
+NOTE: The actual installation code has not been done yet.
+
 To install `proper-dither`, clone the repository and set up your Python environment:
 
 1. Clone the repository:

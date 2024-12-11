@@ -9,7 +9,7 @@ Lauer, T. R. (1999). Combining Undersampled Dithered Images.
 
 Key Features
 ------------
-- Phase adjustment and coefficient calculations using the `phase` function.
+- Phase adjustment and coefficient calculations using the ``phase`` function.
 - 1D complex-to-complex FFT using ``four1``.
 - Real-to-complex and complex-to-real FFT using ``realft``.
 - 2D FFT transformations using ``real2dfft``.
@@ -17,7 +17,7 @@ Key Features
 Assumptions and Constraints
 ---------------------------
 - The code assumes compatibility with NumPy arrays for numerical computations.
-- Some algorithmic logic and constants (e.g., `NSTMAX`, `NDIV`) are directly
+- Some algorithmic logic and constants (e.g., ``NSTMAX``, ``NDIV``) are directly
   ported from the Fortran77 code.
 
 Example Usage
@@ -404,11 +404,11 @@ def four1(data, nn, isign):
     Parameters
     ----------
     data : ndarray
-        Input array of length `2 * nn`, alternating real and imaginary components.
+        Input array of length ``2 * nn``, alternating real and imaginary components.
     nn : int
         Number of complex elements in the data.
     isign : int
-        Sign of the exponent in the FFT; `1` for forward transform, `-1` for inverse transform.
+        Sign of the exponent in the FFT; ``1`` for forward transform, ``-1`` for inverse transform.
 
     Returns
     -------

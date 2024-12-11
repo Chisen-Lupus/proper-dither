@@ -34,7 +34,7 @@ html_static_path = ['_static']
 
 
 
-# Other configuration
+# -- Other configuration -----------------------------------------------------
 
 import os
 import sys
