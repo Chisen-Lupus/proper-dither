@@ -50,6 +50,9 @@
 <li class="toctree-l1 current"><a class="reference internal" href="dither.html">API Documentation</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="dither_legacy.html">Legacy Module</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Updated Module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#key-features">Key Features:</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#dependencies">Dependencies:</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#example-usage">Example Usage:</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#dither.updated.four1_backward"><code class="docutils literal notranslate"><span class="pre">four1_backward()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#dither.updated.four1_forward"><code class="docutils literal notranslate"><span class="pre">four1_forward()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#dither.updated.phase_shift"><code class="docutils literal notranslate"><span class="pre">phase_shift()</span></code></a></li>
@@ -93,20 +96,95 @@
              
   <section id="module-dither.updated">
 <span id="updated-module"></span><h1>Updated Module<a class="headerlink" href="#module-dither.updated" title="Link to this heading"></a></h1>
+<p>This module implements algorithms for Fourier transform operations, phase adjustments,
+and related computations using NumPy’s FFT methods. It provides optimized versions of
+the routines found in <cite>wrapper.py</cite>, significantly improving computation speed while
+maintaining compatibility with the existing workflow.</p>
+<section id="key-features">
+<h2>Key Features:<a class="headerlink" href="#key-features" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><strong>Fourier Transforms</strong>: Fast 1D and 2D real-to-complex and complex-to-real transforms.</p></li>
+<li><p><strong>Phase Adjustments</strong>: Efficient phase shifting for advanced image processing.</p></li>
+<li><p><strong>Enhanced Performance</strong>: Leveraging NumPy’s optimized FFT implementations.</p></li>
+</ul>
+</section>
+<section id="dependencies">
+<h2>Dependencies:<a class="headerlink" href="#dependencies" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>numpy</p></li>
+</ul>
+</section>
+<section id="example-usage">
+<h2>Example Usage:<a class="headerlink" href="#example-usage" title="Link to this heading"></a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">updated</span> <span class="kn">import</span> <span class="n">real2dfft_forward</span><span class="p">,</span> <span class="n">real2dfft_backward</span><span class="p">,</span> <span class="n">phase_shift</span>
+
+<span class="c1"># Perform a forward 2D real FFT</span>
+<span class="n">data_hat</span> <span class="o">=</span> <span class="n">real2dfft_forward</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+<span class="c1"># Perform an inverse 2D real FFT</span>
+<span class="n">reconstructed_data</span> <span class="o">=</span> <span class="n">real2dfft_backward</span><span class="p">(</span><span class="n">data_hat</span><span class="p">)</span>
+
+<span class="c1"># Apply phase shifting</span>
+<span class="n">A_phased</span> <span class="o">=</span> <span class="n">phase_shift</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">offsets</span><span class="o">=</span><span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]],</span> <span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
 <dl class="py function">
 <dt class="sig sig-object py" id="dither.updated.four1_backward">
 <span class="sig-prename descclassname"><span class="pre">dither.updated.</span></span><span class="sig-name descname"><span class="pre">four1_backward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a_hat</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dither/updated.html#four1_backward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dither.updated.four1_backward" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Perform a 1D backward complex-to-complex FFT using NumPy.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>a_hat</strong> (<em>ndarray</em>) – Fourier-transformed input array alternating real and imaginary components.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Inverse Fourier-transformed output array alternating real and imaginary components.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ndarray</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="dither.updated.four1_forward">
 <span class="sig-prename descclassname"><span class="pre">dither.updated.</span></span><span class="sig-name descname"><span class="pre">four1_forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dither/updated.html#four1_forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dither.updated.four1_forward" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Perform a 1D forward complex-to-complex FFT using NumPy.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>a</strong> (<em>ndarray</em>) – Input array alternating real and imaginary components.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Fourier-transformed output array alternating real and imaginary components.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ndarray</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="dither.updated.phase_shift">
 <span class="sig-prename descclassname"><span class="pre">dither.updated.</span></span><span class="sig-name descname"><span class="pre">phase_shift</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">A</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offsets</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dither/updated.html#phase_shift"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dither.updated.phase_shift" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Apply phase shifts to the input data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>A</strong> (<em>ndarray</em>) – Input 2D array representing Fourier-transformed data.</p></li>
+<li><p><strong>offsets</strong> (<em>list</em><em> of </em><em>lists</em>) – Array of offsets and weights, with shape (n, 3), where the columns are
+x-offset, y-offset, and weight.</p></li>
+<li><p><strong>n</strong> (<em>int</em>) – Index of the position for which the coefficients are computed.</p></li>
+<li><p><strong>verbose</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to suppress internal print statements. Default is False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Modified 2D array after phase adjustment.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ndarray</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="dither.updated.phase_updated">
@@ -116,22 +194,70 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="dither.updated.real2dfft_backward">
 <span class="sig-prename descclassname"><span class="pre">dither.updated.</span></span><span class="sig-name descname"><span class="pre">real2dfft_backward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dither/updated.html#real2dfft_backward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dither.updated.real2dfft_backward" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Perform a 2D backward complex-to-real FFT using NumPy.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>data</strong> (<em>ndarray</em>) – Fourier-transformed 2D array.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Reconstructed 2D real array.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ndarray</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="dither.updated.real2dfft_forward">
 <span class="sig-prename descclassname"><span class="pre">dither.updated.</span></span><span class="sig-name descname"><span class="pre">real2dfft_forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dither/updated.html#real2dfft_forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dither.updated.real2dfft_forward" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Perform a 2D forward real-to-complex FFT using NumPy.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>data</strong> (<em>ndarray</em>) – Input 2D real array.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Fourier-transformed 2D array.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ndarray</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="dither.updated.realft_backward">
 <span class="sig-prename descclassname"><span class="pre">dither.updated.</span></span><span class="sig-name descname"><span class="pre">realft_backward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a_hat</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dither/updated.html#realft_backward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dither.updated.realft_backward" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Perform a 1D backward complex-to-real FFT using NumPy.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>a_hat</strong> (<em>ndarray</em>) – Fourier-transformed input array alternating real and imaginary components.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Inverse Fourier-transformed real array.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ndarray</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="dither.updated.realft_forward">
 <span class="sig-prename descclassname"><span class="pre">dither.updated.</span></span><span class="sig-name descname"><span class="pre">realft_forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dither/updated.html#realft_forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dither.updated.realft_forward" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Perform a 1D forward real-to-complex FFT using NumPy.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>a</strong> (<em>ndarray</em>) – Input real array.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Fourier-transformed output array alternating real and imaginary components.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ndarray</p>
+</dd>
+</dl>
+</dd></dl>
 
 </section>
 

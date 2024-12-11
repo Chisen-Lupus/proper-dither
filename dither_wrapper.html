@@ -51,6 +51,9 @@
 <li class="toctree-l2"><a class="reference internal" href="dither_updated.html">Updated Module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="dither_utils.html">Utils Module</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Wrapper Module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#key-features">Key Features:</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#dependencies">Dependencies:</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#example-usage">Example Usage:</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#dither.wrapper.fft"><code class="docutils literal notranslate"><span class="pre">fft()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#dither.wrapper.ifft"><code class="docutils literal notranslate"><span class="pre">ifft()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#dither.wrapper.phase_shift"><code class="docutils literal notranslate"><span class="pre">phase_shift()</span></code></a></li>
@@ -89,30 +92,136 @@
              
   <section id="module-dither.wrapper">
 <span id="wrapper-module"></span><h1>Wrapper Module<a class="headerlink" href="#module-dither.wrapper" title="Link to this heading"></a></h1>
+<p>This module provides a wrapper for the <code class="docutils literal notranslate"><span class="pre">legacy</span></code> module, offering higher-level
+functions for working with Fourier transforms and phase adjustments. It simplifies
+the usage of functions from <code class="docutils literal notranslate"><span class="pre">legacy</span></code> by providing default parameters and
+convenient interfaces.</p>
+<section id="key-features">
+<h2>Key Features:<a class="headerlink" href="#key-features" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Padding and configuration settings for Fourier transform dimensions.</p></li>
+<li><p>High-level FFT and IFFT functions for 2D data.</p></li>
+<li><p>Phase shifting function for advanced image processing.</p></li>
+</ul>
+</section>
+<section id="dependencies">
+<h2>Dependencies:<a class="headerlink" href="#dependencies" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>numpy</p></li>
+<li><p>legacy (translated Fortran77 code from Luer’s (1999) paper).</p></li>
+</ul>
+</section>
+<section id="example-usage">
+<h2>Example Usage:<a class="headerlink" href="#example-usage" title="Link to this heading"></a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">wrapper</span> <span class="kn">import</span> <span class="n">set_padding_size</span><span class="p">,</span> <span class="n">fft</span><span class="p">,</span> <span class="n">ifft</span><span class="p">,</span> <span class="n">phase_shift</span>
+
+<span class="c1"># Set padding size</span>
+<span class="n">set_padding_size</span><span class="p">(</span><span class="n">NC</span><span class="o">=</span><span class="mi">1024</span><span class="p">,</span> <span class="n">NR</span><span class="o">=</span><span class="mi">1024</span><span class="p">)</span>
+
+<span class="c1"># Perform FFT</span>
+<span class="n">data_hat</span> <span class="o">=</span> <span class="n">fft</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+<span class="c1"># Perform IFFT</span>
+<span class="n">reconstructed_data</span> <span class="o">=</span> <span class="n">ifft</span><span class="p">(</span><span class="n">data_hat</span><span class="p">)</span>
+
+<span class="c1"># Apply phase shift</span>
+<span class="n">A_phased</span> <span class="o">=</span> <span class="n">phase_shift</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">offsets</span><span class="o">=</span><span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]],</span> <span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
 <dl class="py function">
 <dt class="sig sig-object py" id="dither.wrapper.fft">
 <span class="sig-prename descclassname"><span class="pre">dither.wrapper.</span></span><span class="sig-name descname"><span class="pre">fft</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dither/wrapper.html#fft"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dither.wrapper.fft" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Perform a 2D forward real-to-complex Fourier transform.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>data</strong> (<em>ndarray</em>) – Input 2D array for transformation.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Transformed data in the Fourier domain.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ndarray</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>The input data is padded to the size specified by <code class="docutils literal notranslate"><span class="pre">NC_SPAT</span></code> and <code class="docutils literal notranslate"><span class="pre">NR_SPAT</span></code>
+before performing the FFT.</p>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="dither.wrapper.ifft">
 <span class="sig-prename descclassname"><span class="pre">dither.wrapper.</span></span><span class="sig-name descname"><span class="pre">ifft</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_hat</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dither/wrapper.html#ifft"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dither.wrapper.ifft" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Perform a 2D inverse complex-to-real Fourier transform.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>data_hat</strong> (<em>ndarray</em>) – Input 2D array in the Fourier domain.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Reconstructed data in the spatial domain.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ndarray</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>The input data is padded to the size specified by <code class="docutils literal notranslate"><span class="pre">NC_FREQ</span></code> and <code class="docutils literal notranslate"><span class="pre">NR_FREQ</span></code>
+before performing the inverse FFT.</p>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="dither.wrapper.phase_shift">
 <span class="sig-prename descclassname"><span class="pre">dither.wrapper.</span></span><span class="sig-name descname"><span class="pre">phase_shift</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">A</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offsets</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dither/wrapper.html#phase_shift"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dither.wrapper.phase_shift" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Apply phase shifts to the input data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>A</strong> (<em>ndarray</em>) – Input 2D array representing Fourier-transformed data.</p></li>
+<li><p><strong>offsets</strong> (<em>list</em><em> of </em><em>lists</em>) – Array of offsets and weights, with shape (n, 3), where the columns are
+x-offset, y-offset, and weight.</p></li>
+<li><p><strong>n</strong> (<em>int</em>) – Index of the position for which the coefficients are computed.</p></li>
+<li><p><strong>verbose</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to suppress internal print statements. Default is True.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Modified 2D array after phase adjustment.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ndarray</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>This function uses the <code class="docutils literal notranslate"><span class="pre">phase</span></code> function from the <code class="docutils literal notranslate"><span class="pre">legacy</span></code> module to
+perform the adjustments.</p>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="dither.wrapper.set_dither_size">
 <span class="sig-prename descclassname"><span class="pre">dither.wrapper.</span></span><span class="sig-name descname"><span class="pre">set_dither_size</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">factor</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dither/wrapper.html#set_dither_size"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dither.wrapper.set_dither_size" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Set the dither factor used in the phase shifting process.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>factor</strong> (<em>int</em>) – Dither factor (number of sub-samples per pixel).</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="dither.wrapper.set_padding_size">
 <span class="sig-prename descclassname"><span class="pre">dither.wrapper.</span></span><span class="sig-name descname"><span class="pre">set_padding_size</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">NC</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">NR</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dither/wrapper.html#set_padding_size"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dither.wrapper.set_padding_size" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Set the padding size for FFT operations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>NC</strong> (<em>int</em>) – Number of columns for the Fourier transform.</p></li>
+<li><p><strong>NR</strong> (<em>int</em>) – Number of rows for the Fourier transform.</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>Both NC and NR must satisfy the constraints imposed by the Fourier transform:
+NC must be <code class="docutils literal notranslate"><span class="pre">2**N</span> <span class="pre">+</span> <span class="pre">2</span></code>, and NR must be <code class="docutils literal notranslate"><span class="pre">2**N</span></code> for some integer N.</p>
+</dd></dl>
 
 </section>
 

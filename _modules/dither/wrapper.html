@@ -72,7 +72,43 @@
            <div itemprop="articleBody">
              
   <h1>Source code for dither.wrapper</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This module provides a wrapper for the ``legacy`` module, offering higher-level</span>
+<span class="sd">functions for working with Fourier transforms and phase adjustments. It simplifies</span>
+<span class="sd">the usage of functions from ``legacy`` by providing default parameters and</span>
+<span class="sd">convenient interfaces.</span>
+
+<span class="sd">Key Features:</span>
+<span class="sd">-------------</span>
+<span class="sd">- Padding and configuration settings for Fourier transform dimensions.</span>
+<span class="sd">- High-level FFT and IFFT functions for 2D data.</span>
+<span class="sd">- Phase shifting function for advanced image processing.</span>
+
+<span class="sd">Dependencies:</span>
+<span class="sd">-------------</span>
+<span class="sd">- numpy</span>
+<span class="sd">- legacy (translated Fortran77 code from Luer&#39;s (1999) paper).</span>
+
+<span class="sd">Example Usage:</span>
+<span class="sd">--------------</span>
+<span class="sd">.. code-block:: python</span>
+
+<span class="sd">    from wrapper import set_padding_size, fft, ifft, phase_shift</span>
+
+<span class="sd">    # Set padding size</span>
+<span class="sd">    set_padding_size(NC=1024, NR=1024)</span>
+
+<span class="sd">    # Perform FFT</span>
+<span class="sd">    data_hat = fft(data)</span>
+
+<span class="sd">    # Perform IFFT</span>
+<span class="sd">    reconstructed_data = ifft(data_hat)</span>
+
+<span class="sd">    # Apply phase shift</span>
+<span class="sd">    A_phased = phase_shift(A, offsets=[[0, 0, 1]], n=1)</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">os</span>
 <span class="kn">from</span> <span class="nn">importlib</span> <span class="kn">import</span> <span class="n">reload</span>
 
@@ -90,6 +126,21 @@
 <div class="viewcode-block" id="set_padding_size">
 <a class="viewcode-back" href="../../dither_wrapper.html#dither.wrapper.set_padding_size">[docs]</a>
 <span class="k">def</span> <span class="nf">set_padding_size</span><span class="p">(</span><span class="n">NC</span><span class="p">,</span> <span class="n">NR</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Set the padding size for FFT operations.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    NC : int</span>
+<span class="sd">        Number of columns for the Fourier transform.</span>
+<span class="sd">    NR : int</span>
+<span class="sd">        Number of rows for the Fourier transform.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    Both NC and NR must satisfy the constraints imposed by the Fourier transform:</span>
+<span class="sd">    NC must be ``2**N + 2``, and NR must be ``2**N`` for some integer N.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">global</span> <span class="n">NC_FREQ</span><span class="p">,</span> <span class="n">NR_FREQ</span><span class="p">,</span> <span class="n">NC_SPAT</span><span class="p">,</span> <span class="n">NR_SPAT</span>
     <span class="n">NC_FREQ</span> <span class="o">=</span> <span class="n">NC</span>
     <span class="n">NR_FREQ</span> <span class="o">=</span> <span class="n">NR</span>
@@ -100,6 +151,14 @@
 <div class="viewcode-block" id="set_dither_size">
 <a class="viewcode-back" href="../../dither_wrapper.html#dither.wrapper.set_dither_size">[docs]</a>
 <span class="k">def</span> <span class="nf">set_dither_size</span><span class="p">(</span><span class="n">factor</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Set the dither factor used in the phase shifting process.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    factor : int</span>
+<span class="sd">        Dither factor (number of sub-samples per pixel).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">global</span> <span class="n">NSUB</span>
     <span class="n">NSUB</span> <span class="o">=</span> <span class="n">factor</span></div>
 
@@ -107,6 +166,24 @@
 <div class="viewcode-block" id="fft">
 <a class="viewcode-back" href="../../dither_wrapper.html#dither.wrapper.fft">[docs]</a>
 <span class="k">def</span> <span class="nf">fft</span><span class="p">(</span><span class="n">data</span><span class="p">):</span> 
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Perform a 2D forward real-to-complex Fourier transform.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    data : ndarray</span>
+<span class="sd">        Input 2D array for transformation.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ndarray</span>
+<span class="sd">        Transformed data in the Fourier domain.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    The input data is padded to the size specified by ``NC_SPAT`` and ``NR_SPAT``</span>
+<span class="sd">    before performing the FFT.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">NC_SPAT</span><span class="p">,</span> <span class="n">NR_SPAT</span><span class="p">))</span>
     <span class="n">b</span><span class="p">[:</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">:</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span> <span class="o">=</span> <span class="n">data</span>
     <span class="c1"># b[100:200, 100:200] = data_large[100:200, 100:200]</span>
@@ -122,6 +199,24 @@
 <div class="viewcode-block" id="ifft">
 <a class="viewcode-back" href="../../dither_wrapper.html#dither.wrapper.ifft">[docs]</a>
 <span class="k">def</span> <span class="nf">ifft</span><span class="p">(</span><span class="n">data_hat</span><span class="p">):</span> 
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Perform a 2D inverse complex-to-real Fourier transform.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    data_hat : ndarray</span>
+<span class="sd">        Input 2D array in the Fourier domain.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ndarray</span>
+<span class="sd">        Reconstructed data in the spatial domain.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    The input data is padded to the size specified by ``NC_FREQ`` and ``NR_FREQ``</span>
+<span class="sd">    before performing the inverse FFT.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">NC_FREQ</span><span class="p">,</span> <span class="n">NR_FREQ</span><span class="p">))</span>
     <span class="n">b</span><span class="p">[:</span><span class="n">data_hat</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">:</span><span class="n">data_hat</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span> <span class="o">=</span> <span class="n">data_hat</span>
     <span class="c1"># b[100:200, 100:200] = data_large[100:200, 100:200]</span>
@@ -137,6 +232,31 @@
 <div class="viewcode-block" id="phase_shift">
 <a class="viewcode-back" href="../../dither_wrapper.html#dither.wrapper.phase_shift">[docs]</a>
 <span class="k">def</span> <span class="nf">phase_shift</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">offsets</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Apply phase shifts to the input data.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    A : ndarray</span>
+<span class="sd">        Input 2D array representing Fourier-transformed data.</span>
+<span class="sd">    offsets : list of lists</span>
+<span class="sd">        Array of offsets and weights, with shape (n, 3), where the columns are</span>
+<span class="sd">        x-offset, y-offset, and weight.</span>
+<span class="sd">    n : int</span>
+<span class="sd">        Index of the position for which the coefficients are computed.</span>
+<span class="sd">    verbose : bool, optional</span>
+<span class="sd">        Whether to suppress internal print statements. Default is True.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ndarray</span>
+<span class="sd">        Modified 2D array after phase adjustment.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    This function uses the ``phase`` function from the ``legacy`` module to</span>
+<span class="sd">    perform the adjustments.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">DR</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="n">DC</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="n">shift</span> <span class="o">=</span> <span class="kc">False</span>

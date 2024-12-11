@@ -103,7 +103,7 @@ transform techniques and phase calculations for astronomical image processing.</
 <section id="key-features">
 <h2>Key Features<a class="headerlink" href="#key-features" title="Link to this heading"></a></h2>
 <ul class="simple">
-<li><p>Phase adjustment and coefficient calculations using the <cite>phase</cite> function.</p></li>
+<li><p>Phase adjustment and coefficient calculations using the <code class="docutils literal notranslate"><span class="pre">phase</span></code> function.</p></li>
 <li><p>1D complex-to-complex FFT using <code class="docutils literal notranslate"><span class="pre">four1</span></code>.</p></li>
 <li><p>Real-to-complex and complex-to-real FFT using <code class="docutils literal notranslate"><span class="pre">realft</span></code>.</p></li>
 <li><p>2D FFT transformations using <code class="docutils literal notranslate"><span class="pre">real2dfft</span></code>.</p></li>
@@ -113,7 +113,7 @@ transform techniques and phase calculations for astronomical image processing.</
 <h2>Assumptions and Constraints<a class="headerlink" href="#assumptions-and-constraints" title="Link to this heading"></a></h2>
 <ul class="simple">
 <li><p>The code assumes compatibility with NumPy arrays for numerical computations.</p></li>
-<li><p>Some algorithmic logic and constants (e.g., <cite>NSTMAX</cite>, <cite>NDIV</cite>) are directly
+<li><p>Some algorithmic logic and constants (e.g., <code class="docutils literal notranslate"><span class="pre">NSTMAX</span></code>, <code class="docutils literal notranslate"><span class="pre">NDIV</span></code>) are directly
 ported from the Fortran77 code.</p></li>
 </ul>
 </section>
@@ -140,9 +140,9 @@ ported from the Fortran77 code.</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>data</strong> (<em>ndarray</em>) – Input array of length <cite>2 * nn</cite>, alternating real and imaginary components.</p></li>
+<li><p><strong>data</strong> (<em>ndarray</em>) – Input array of length <code class="docutils literal notranslate"><span class="pre">2</span> <span class="pre">*</span> <span class="pre">nn</span></code>, alternating real and imaginary components.</p></li>
 <li><p><strong>nn</strong> (<em>int</em>) – Number of complex elements in the data.</p></li>
-<li><p><strong>isign</strong> (<em>int</em>) – Sign of the exponent in the FFT; <cite>1</cite> for forward transform, <cite>-1</cite> for inverse transform.</p></li>
+<li><p><strong>isign</strong> (<em>int</em>) – Sign of the exponent in the FFT; <code class="docutils literal notranslate"><span class="pre">1</span></code> for forward transform, <code class="docutils literal notranslate"><span class="pre">-1</span></code> for inverse transform.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>

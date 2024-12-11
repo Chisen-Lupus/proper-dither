@@ -72,12 +72,57 @@
            <div itemprop="articleBody">
              
   <h1>Source code for dither.updated</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">sys</span>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This module implements algorithms for Fourier transform operations, phase adjustments,</span>
+<span class="sd">and related computations using NumPy&#39;s FFT methods. It provides optimized versions of</span>
+<span class="sd">the routines found in `wrapper.py`, significantly improving computation speed while</span>
+<span class="sd">maintaining compatibility with the existing workflow.</span>
+
+<span class="sd">Key Features:</span>
+<span class="sd">-------------</span>
+<span class="sd">- **Fourier Transforms**: Fast 1D and 2D real-to-complex and complex-to-real transforms.</span>
+<span class="sd">- **Phase Adjustments**: Efficient phase shifting for advanced image processing.</span>
+<span class="sd">- **Enhanced Performance**: Leveraging NumPy&#39;s optimized FFT implementations.</span>
+
+<span class="sd">Dependencies:</span>
+<span class="sd">-------------</span>
+<span class="sd">- numpy</span>
+
+<span class="sd">Example Usage:</span>
+<span class="sd">--------------</span>
+<span class="sd">.. code-block:: python</span>
+
+<span class="sd">    from updated import real2dfft_forward, real2dfft_backward, phase_shift</span>
+
+<span class="sd">    # Perform a forward 2D real FFT</span>
+<span class="sd">    data_hat = real2dfft_forward(data)</span>
+
+<span class="sd">    # Perform an inverse 2D real FFT</span>
+<span class="sd">    reconstructed_data = real2dfft_backward(data_hat)</span>
+
+<span class="sd">    # Apply phase shifting</span>
+<span class="sd">    A_phased = phase_shift(A, offsets=[[0, 0, 1]], n=1)</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">sys</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 <div class="viewcode-block" id="four1_forward">
 <a class="viewcode-back" href="../../dither_updated.html#dither.updated.four1_forward">[docs]</a>
 <span class="k">def</span> <span class="nf">four1_forward</span><span class="p">(</span><span class="n">a</span><span class="p">):</span> 
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Perform a 1D forward complex-to-complex FFT using NumPy.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    a : ndarray</span>
+<span class="sd">        Input array alternating real and imaginary components.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ndarray</span>
+<span class="sd">        Fourier-transformed output array alternating real and imaginary components.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">a_complex</span> <span class="o">=</span> <span class="n">a</span><span class="p">[::</span><span class="mi">2</span><span class="p">]</span><span class="o">+</span><span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">::</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="mi">1</span><span class="n">j</span>
     <span class="n">a_hat_complex</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fft</span><span class="p">(</span><span class="n">a_complex</span><span class="p">)</span>
     <span class="n">a_hat_real</span> <span class="o">=</span> <span class="n">a_hat_complex</span><span class="o">.</span><span class="n">real</span>
@@ -93,6 +138,19 @@
 <div class="viewcode-block" id="four1_backward">
 <a class="viewcode-back" href="../../dither_updated.html#dither.updated.four1_backward">[docs]</a>
 <span class="k">def</span> <span class="nf">four1_backward</span><span class="p">(</span><span class="n">a_hat</span><span class="p">):</span> 
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Perform a 1D backward complex-to-complex FFT using NumPy.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    a_hat : ndarray</span>
+<span class="sd">        Fourier-transformed input array alternating real and imaginary components.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ndarray</span>
+<span class="sd">        Inverse Fourier-transformed output array alternating real and imaginary components.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">a_hat_real</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">a_hat</span><span class="p">)</span><span class="o">//</span><span class="mi">2</span><span class="p">)</span>
     <span class="n">a_hat_imag</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">a_hat</span><span class="p">)</span><span class="o">//</span><span class="mi">2</span><span class="p">)</span>
     <span class="n">a_hat_real</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">a_hat</span><span class="p">[</span><span class="mi">2</span><span class="p">::</span><span class="mi">2</span><span class="p">]</span>
@@ -111,6 +169,19 @@
 <div class="viewcode-block" id="realft_forward">
 <a class="viewcode-back" href="../../dither_updated.html#dither.updated.realft_forward">[docs]</a>
 <span class="k">def</span> <span class="nf">realft_forward</span><span class="p">(</span><span class="n">a</span><span class="p">):</span> 
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Perform a 1D forward real-to-complex FFT using NumPy.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    a : ndarray</span>
+<span class="sd">        Input real array.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ndarray</span>
+<span class="sd">        Fourier-transformed output array alternating real and imaginary components.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
     <span class="n">nn</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="o">-</span> <span class="mi">2</span><span class="p">)</span><span class="o">//</span><span class="mi">2</span>
     <span class="n">a_hat_complex</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fft</span><span class="p">(</span><span class="n">a</span><span class="p">[:</span><span class="n">nn</span><span class="o">*</span><span class="mi">2</span><span class="p">])</span>
@@ -125,6 +196,19 @@
 <div class="viewcode-block" id="realft_backward">
 <a class="viewcode-back" href="../../dither_updated.html#dither.updated.realft_backward">[docs]</a>
 <span class="k">def</span> <span class="nf">realft_backward</span><span class="p">(</span><span class="n">a_hat</span><span class="p">):</span> 
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Perform a 1D backward complex-to-real FFT using NumPy.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    a_hat : ndarray</span>
+<span class="sd">        Fourier-transformed input array alternating real and imaginary components.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ndarray</span>
+<span class="sd">        Inverse Fourier-transformed real array.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">nn</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">a_hat</span><span class="p">)</span> <span class="o">-</span> <span class="mi">2</span><span class="p">)</span><span class="o">//</span><span class="mi">2</span>
     <span class="n">a_hat_real</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">nn</span><span class="o">*</span><span class="mi">2</span><span class="p">)</span>
     <span class="n">a_hat_real</span><span class="p">[:</span><span class="n">nn</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">a_hat</span><span class="p">[</span><span class="mi">0</span><span class="p">::</span><span class="mi">2</span><span class="p">]</span>
@@ -143,6 +227,19 @@
 <div class="viewcode-block" id="real2dfft_forward">
 <a class="viewcode-back" href="../../dither_updated.html#dither.updated.real2dfft_forward">[docs]</a>
 <span class="k">def</span> <span class="nf">real2dfft_forward</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Perform a 2D forward real-to-complex FFT using NumPy.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    data : ndarray</span>
+<span class="sd">        Input 2D real array.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ndarray</span>
+<span class="sd">        Fourier-transformed 2D array.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">nc</span><span class="p">,</span> <span class="n">nr</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span>
     <span class="n">data_hat</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
     <span class="k">for</span> <span class="n">ir</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nr</span><span class="p">):</span>
@@ -160,6 +257,19 @@
 <div class="viewcode-block" id="real2dfft_backward">
 <a class="viewcode-back" href="../../dither_updated.html#dither.updated.real2dfft_backward">[docs]</a>
 <span class="k">def</span> <span class="nf">real2dfft_backward</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Perform a 2D backward complex-to-real FFT using NumPy.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    data : ndarray</span>
+<span class="sd">        Fourier-transformed 2D array.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ndarray</span>
+<span class="sd">        Reconstructed 2D real array.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">nc</span><span class="p">,</span> <span class="n">nr</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span>
     <span class="n">data_hat</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
     <span class="k">for</span> <span class="n">ic</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">nc</span><span class="p">,</span> <span class="mi">2</span><span class="p">):</span>
@@ -403,6 +513,26 @@
 <div class="viewcode-block" id="phase_shift">
 <a class="viewcode-back" href="../../dither_updated.html#dither.updated.phase_shift">[docs]</a>
 <span class="k">def</span> <span class="nf">phase_shift</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">offsets</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Apply phase shifts to the input data.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    A : ndarray</span>
+<span class="sd">        Input 2D array representing Fourier-transformed data.</span>
+<span class="sd">    offsets : list of lists</span>
+<span class="sd">        Array of offsets and weights, with shape (n, 3), where the columns are</span>
+<span class="sd">        x-offset, y-offset, and weight.</span>
+<span class="sd">    n : int</span>
+<span class="sd">        Index of the position for which the coefficients are computed.</span>
+<span class="sd">    verbose : bool, optional</span>
+<span class="sd">        Whether to suppress internal print statements. Default is False.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ndarray</span>
+<span class="sd">        Modified 2D array after phase adjustment.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">verbose</span><span class="p">:</span> 
         <span class="n">stdout_backup</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span>
         <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">devnull</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
