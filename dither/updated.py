@@ -1,7 +1,7 @@
 """
 This module implements algorithms for Fourier transform operations, phase adjustments,
 and related computations using NumPy's FFT methods. It provides optimized versions of
-the routines found in `wrapper.py`, significantly improving computation speed while
+the routines found in ``wrapper.py``, significantly improving computation speed while
 maintaining compatibility with the existing workflow.
 
 Key Features:
