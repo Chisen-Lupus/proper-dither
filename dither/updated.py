@@ -1,7 +1,52 @@
+"""
+This module implements algorithms for Fourier transform operations, phase adjustments,
+and related computations using NumPy's FFT methods. It provides optimized versions of
+the routines found in `wrapper.py`, significantly improving computation speed while
+maintaining compatibility with the existing workflow.
+
+Key Features:
+-------------
+- **Fourier Transforms**: Fast 1D and 2D real-to-complex and complex-to-real transforms.
+- **Phase Adjustments**: Efficient phase shifting for advanced image processing.
+- **Enhanced Performance**: Leveraging NumPy's optimized FFT implementations.
+
+Dependencies:
+-------------
+- numpy
+
+Example Usage:
+--------------
+.. code-block:: python
+
+    from updated import real2dfft_forward, real2dfft_backward, phase_shift
+
+    # Perform a forward 2D real FFT
+    data_hat = real2dfft_forward(data)
+
+    # Perform an inverse 2D real FFT
+    reconstructed_data = real2dfft_backward(data_hat)
+
+    # Apply phase shifting
+    A_phased = phase_shift(A, offsets=[[0, 0, 1]], n=1)
+"""
+
 import os, sys
 import numpy as np
 
 def four1_forward(a): 
+    """
+    Perform a 1D forward complex-to-complex FFT using NumPy.
+
+    Parameters
+    ----------
+    a : ndarray
+        Input array alternating real and imaginary components.
+
+    Returns
+    -------
+    ndarray
+        Fourier-transformed output array alternating real and imaginary components.
+    """
     a_complex = a[::2]+a[1::2]*1j
     a_hat_complex = np.fft.fft(a_complex)
     a_hat_real = a_hat_complex.real
@@ -14,6 +59,19 @@ def four1_forward(a):
     return a_hat
 
 def four1_backward(a_hat): 
+    """
+    Perform a 1D backward complex-to-complex FFT using NumPy.
+
+    Parameters
+    ----------
+    a_hat : ndarray
+        Fourier-transformed input array alternating real and imaginary components.
+
+    Returns
+    -------
+    ndarray
+        Inverse Fourier-transformed output array alternating real and imaginary components.
+    """
     a_hat_real = np.zeros(len(a_hat)//2)
     a_hat_imag = np.zeros(len(a_hat)//2)
     a_hat_real[-1:0:-1] = a_hat[2::2]
@@ -29,6 +87,19 @@ def four1_backward(a_hat):
     return a
 
 def realft_forward(a): 
+    """
+    Perform a 1D forward real-to-complex FFT using NumPy.
+
+    Parameters
+    ----------
+    a : ndarray
+        Input real array.
+
+    Returns
+    -------
+    ndarray
+        Fourier-transformed output array alternating real and imaginary components.
+    """
     n = len(a)
     nn = (len(a) - 2)//2
     a_hat_complex = np.fft.fft(a[:nn*2])
@@ -40,6 +111,19 @@ def realft_forward(a):
     return a_hat
 
 def realft_backward(a_hat): 
+    """
+    Perform a 1D backward complex-to-real FFT using NumPy.
+
+    Parameters
+    ----------
+    a_hat : ndarray
+        Fourier-transformed input array alternating real and imaginary components.
+
+    Returns
+    -------
+    ndarray
+        Inverse Fourier-transformed real array.
+    """
     nn = (len(a_hat) - 2)//2
     a_hat_real = np.zeros(nn*2)
     a_hat_real[:nn+1] = a_hat[0::2]
@@ -55,6 +139,19 @@ def realft_backward(a_hat):
     return a
 
 def real2dfft_forward(data):
+    """
+    Perform a 2D forward real-to-complex FFT using NumPy.
+
+    Parameters
+    ----------
+    data : ndarray
+        Input 2D real array.
+
+    Returns
+    -------
+    ndarray
+        Fourier-transformed 2D array.
+    """
     nc, nr = data.shape
     data_hat = data.copy()
     for ir in range(nr):
@@ -69,6 +166,19 @@ def real2dfft_forward(data):
     return data_hat
 
 def real2dfft_backward(data):
+    """
+    Perform a 2D backward complex-to-real FFT using NumPy.
+
+    Parameters
+    ----------
+    data : ndarray
+        Fourier-transformed 2D array.
+
+    Returns
+    -------
+    ndarray
+        Reconstructed 2D real array.
+    """
     nc, nr = data.shape
     data_hat = data.copy()
     for ic in range(0, nc, 2):
@@ -306,6 +416,26 @@ def phase_updated(A_in, offsets, npos):
     return A
 
 def phase_shift(A, offsets, n, verbose=False):
+    """
+    Apply phase shifts to the input data.
+
+    Parameters
+    ----------
+    A : ndarray
+        Input 2D array representing Fourier-transformed data.
+    offsets : list of lists
+        Array of offsets and weights, with shape (n, 3), where the columns are
+        x-offset, y-offset, and weight.
+    n : int
+        Index of the position for which the coefficients are computed.
+    verbose : bool, optional
+        Whether to suppress internal print statements. Default is False.
+
+    Returns
+    -------
+    ndarray
+        Modified 2D array after phase adjustment.
+    """
     if not verbose: 
         stdout_backup = sys.stdout
         sys.stdout = open(os.devnull, 'w')
