@@ -363,49 +363,36 @@ def phase(A_in, nrow, ncol, DR, DC, offsets, npos):
         isu = 1
         for ix in range(0, nsx):
             isec += 1
-            # print(isec, coef[isec-1])
-            spr = coef[isec-1].real # NOTE Fortran casts Complex to Real directly
-            spi = coef[isec-1].imag
-            # print('this coef', coef[isec-1])
-            # COEFS.append(coef[isec-1])
-            for vrow in range(isv, iev-1, -1): 
-                # print('vrow', vrow, 'isv', isv, 'iev', iev)
-                if vrow>0:
-                    row = vrow
-                else: 
-                    row = nrow + vrow
-                if row>nrow//2: 
-                    V = (row - nrow - 1)/nrow
-                else: 
-                    V = (row - 1)/nrow
-                rphase = -2*phiy[npos-1]*V
-                # rphase = rphase/2-1
-                # print(rphase)
-                rpr = np.cos(rphase)
-                rpi = np.sin(rphase)
-                ypr = rpr*spr - rpi*spi
-                ypi = rpi*spr + rpr*spi
-                # print(rphase, rpr, rpi, spr, spi, ypr, ypi, rpr*spr)
-                # print((ieu+1-isu)//2)
-                for col in range(isu, ieu+1, 2):
-                    # print(row, isv, iev, col, isu, ieu)
-                    U = (col - 1)/(ncol - 2)/2
-                    cphase = -2*phix[npos-1]*U
-                    # print(U, V)
-                    # print(rphase, cphase, phiy[npos-1], phiy[npos-1])
-                    # print(' ', cphase)
-                    # print(rphase, cphase)
-                    cpr = np.cos(cphase)
-                    cpi = np.sin(cphase)
-                    tpr = ypr*cpr - ypi*cpi
-                    tpi = ypi*cpr + ypr*cpi
-                    # print(vrow, row, col, isu, ieu+2)
-                    fr = A[col-1, row-1]
-                    fi = A[col+1-1, row-1]
-                    # print('ypr', ypr, cpr, ypr*cpr, ypi, cpi, ypr*cpr - ypi*cpi, tpr,tpi)
-                    # print()
-                    A[col-1, row-1] = fr*tpr - fi*tpi
-                    A[col+1-1, row-1] = fi*tpr + fr*tpi
+            A_complex = A[::2, :] + 1j * A[1::2, :]
+
+            # Extract the complex coefficient
+            coef_complex = coef[isec-1]
+
+            # Compute the normalized row positions (V)
+            rows = np.arange(isv, iev-1, -1)
+            rows = np.where(rows > 0, rows, nrow + rows)
+            V = np.where(rows > nrow // 2, (rows - nrow - 1) / nrow, (rows - 1) / nrow)
+
+            # Compute the row phase shift (as a complex exponential)
+            rphase = np.exp(-2j * phiy[npos-1] * V)
+
+            # Compute the normalized column positions (U)
+            cols = np.arange(isu, ieu + 1, 2)
+            U = (cols - 1) / (ncol - 2) / 2
+
+            # Compute the column phase shift (as a complex exponential)
+            cphase = np.exp(-2j * phix[npos-1] * U)
+
+            # Compute the overall phase shift (outer product for broadcasting)
+            phase_shift = coef_complex * np.outer(cphase, rphase)
+
+            # Apply the phase shift to A
+            A_complex[np.ix_(cols // 2, rows - 1)] *= phase_shift
+
+            # If needed, convert back to separate real and imaginary parts
+            A[::2, :] = A_complex.real
+            A[1::2, :] = A_complex.imag
+            
             isu = ieu + 1
             ieu = ncol - (nsx - 2 - ix)*ncol//NSUB # TODO: check values
         isv = iev - 1
