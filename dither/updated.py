@@ -194,8 +194,6 @@ def real2dfft_backward(data):
     return data_hat
 
 
-### NOTE: TEST CODE
-
 PI = np.pi
 RADIOAN = PI/180
 NSUB = 2
@@ -401,5 +399,28 @@ def phase(A_in, offsets, npos):
     return A
 
 
+def combine_image(normalized_atlas, centroids, wt):
 
+    # [y, x, wt]
+    offsets = np.hstack((centroids[:, ::-1], wt[:, np.newaxis]))
+    # print(offsets)
+    Atotal = np.zeros((NC_FREQ, NR_FREQ))
+    for i in range(len(normalized_atlas)): 
+        data = normalized_atlas[i]
+        nx, ny = data.shape
+        data_large = np.zeros((NC_FREQ, NR_FREQ))
+        data_large[:nx*NSUB:NSUB, :ny*NSUB:NSUB] = data
+        A = real2dfft_forward(data_large)
+        n = i + 1
+
+        
+        Aphased = phase(A, offsets, n)
+        
+        Atotal += Aphased
+    f = real2dfft_backward(Atotal)
+    nx, ny = normalized_atlas[0].shape
+    nx_large = nx*NSUB
+    ny_large = ny*NSUB
+    combined_image = f[:nx_large, :ny_large]
+    return combined_image
 
