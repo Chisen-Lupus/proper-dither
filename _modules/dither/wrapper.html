@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>dither.wrapper &mdash; Proper Dither 0.1 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
 
   
@@ -108,11 +108,11 @@
 <span class="sd">    A_phased = phase_shift(A, offsets=[[0, 0, 1]], n=1)</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">os</span>
-<span class="kn">from</span> <span class="nn">importlib</span> <span class="kn">import</span> <span class="n">reload</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span><span class="o">,</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">importlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">reload</span>
 
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">legacy</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">legacy</span>
 
 <span class="n">NC_FREQ</span> <span class="o">=</span> <span class="mi">514</span> <span class="c1"># must be 2**N + 2</span>
 <span class="n">NR_FREQ</span> <span class="o">=</span> <span class="mi">512</span> <span class="c1"># must be 2**N</span>
@@ -125,7 +125,7 @@
 
 <div class="viewcode-block" id="set_padding_size">
 <a class="viewcode-back" href="../../dither_wrapper.html#dither.wrapper.set_padding_size">[docs]</a>
-<span class="k">def</span> <span class="nf">set_padding_size</span><span class="p">(</span><span class="n">NC</span><span class="p">,</span> <span class="n">NR</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">set_padding_size</span><span class="p">(</span><span class="n">NC</span><span class="p">,</span> <span class="n">NR</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Set the padding size for FFT operations.</span>
 
@@ -150,7 +150,7 @@
 
 <div class="viewcode-block" id="set_dither_size">
 <a class="viewcode-back" href="../../dither_wrapper.html#dither.wrapper.set_dither_size">[docs]</a>
-<span class="k">def</span> <span class="nf">set_dither_size</span><span class="p">(</span><span class="n">factor</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">set_dither_size</span><span class="p">(</span><span class="n">factor</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Set the dither factor used in the phase shifting process.</span>
 
@@ -165,7 +165,7 @@
 
 <div class="viewcode-block" id="fft">
 <a class="viewcode-back" href="../../dither_wrapper.html#dither.wrapper.fft">[docs]</a>
-<span class="k">def</span> <span class="nf">fft</span><span class="p">(</span><span class="n">data</span><span class="p">):</span> 
+<span class="k">def</span><span class="w"> </span><span class="nf">fft</span><span class="p">(</span><span class="n">data</span><span class="p">):</span> 
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Perform a 2D forward real-to-complex Fourier transform.</span>
 
@@ -198,7 +198,7 @@
 
 <div class="viewcode-block" id="ifft">
 <a class="viewcode-back" href="../../dither_wrapper.html#dither.wrapper.ifft">[docs]</a>
-<span class="k">def</span> <span class="nf">ifft</span><span class="p">(</span><span class="n">data_hat</span><span class="p">):</span> 
+<span class="k">def</span><span class="w"> </span><span class="nf">ifft</span><span class="p">(</span><span class="n">data_hat</span><span class="p">):</span> 
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Perform a 2D inverse complex-to-real Fourier transform.</span>
 
@@ -231,7 +231,7 @@
 
 <div class="viewcode-block" id="phase_shift">
 <a class="viewcode-back" href="../../dither_wrapper.html#dither.wrapper.phase_shift">[docs]</a>
-<span class="k">def</span> <span class="nf">phase_shift</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">offsets</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">phase_shift</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">offsets</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Apply phase shifts to the input data.</span>
 

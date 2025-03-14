@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>dither.legacy &mdash; Proper Dither 0.1 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
 
   
@@ -111,7 +111,7 @@
 <span class="sd">    fft_result = legacy.four1(data, nn=128, isign=1)</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
 <span class="n">PI</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span>
 <span class="n">RADIOAN</span> <span class="o">=</span> <span class="n">PI</span><span class="o">/</span><span class="mi">180</span>
@@ -125,7 +125,7 @@
 
 <div class="viewcode-block" id="phase">
 <a class="viewcode-back" href="../../dither_legacy.html#dither.legacy.phase">[docs]</a>
-<span class="k">def</span> <span class="nf">phase</span><span class="p">(</span><span class="n">A_in</span><span class="p">,</span> <span class="n">nrow</span><span class="p">,</span> <span class="n">ncol</span><span class="p">,</span> <span class="n">shift</span><span class="p">,</span> <span class="n">DR</span><span class="p">,</span> <span class="n">DC</span><span class="p">,</span> <span class="n">offsets</span><span class="p">,</span> <span class="n">npos</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">phase</span><span class="p">(</span><span class="n">A_in</span><span class="p">,</span> <span class="n">nrow</span><span class="p">,</span> <span class="n">ncol</span><span class="p">,</span> <span class="n">shift</span><span class="p">,</span> <span class="n">DR</span><span class="p">,</span> <span class="n">DC</span><span class="p">,</span> <span class="n">offsets</span><span class="p">,</span> <span class="n">npos</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Apply phase shifts and calculate coefficients for Fourier-based image transformations.</span>
 
@@ -476,7 +476,7 @@
 
 <div class="viewcode-block" id="four1">
 <a class="viewcode-back" href="../../dither_legacy.html#dither.legacy.four1">[docs]</a>
-<span class="k">def</span> <span class="nf">four1</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">nn</span><span class="p">,</span> <span class="n">isign</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">four1</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">nn</span><span class="p">,</span> <span class="n">isign</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Perform a 1D complex-to-complex Fast Fourier Transform (FFT).</span>
 
@@ -544,7 +544,7 @@
 
 <div class="viewcode-block" id="realft">
 <a class="viewcode-back" href="../../dither_legacy.html#dither.legacy.realft">[docs]</a>
-<span class="k">def</span> <span class="nf">realft</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">isign</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">realft</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">isign</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Perform a real-to-complex or complex-to-real FFT transformation.</span>
 
@@ -610,7 +610,7 @@
 
 <div class="viewcode-block" id="real2dfft">
 <a class="viewcode-back" href="../../dither_legacy.html#dither.legacy.real2dfft">[docs]</a>
-<span class="k">def</span> <span class="nf">real2dfft</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">nra</span><span class="p">,</span> <span class="n">nca</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">nrb</span><span class="p">,</span> <span class="n">ncb</span><span class="p">,</span> <span class="n">isign</span><span class="p">,</span> <span class="n">work</span><span class="p">,</span> <span class="n">onedim</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">real2dfft</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">nra</span><span class="p">,</span> <span class="n">nca</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">nrb</span><span class="p">,</span> <span class="n">ncb</span><span class="p">,</span> <span class="n">isign</span><span class="p">,</span> <span class="n">work</span><span class="p">,</span> <span class="n">onedim</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Perform a 2D real-to-complex or complex-to-real FFT transformation.</span>
 

@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>dither.updated &mdash; Proper Dither 0.1 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
 
   
@@ -104,12 +104,12 @@
 <span class="sd">    A_phased = phase_shift(A, offsets=[[0, 0, 1]], n=1)</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">sys</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span><span class="o">,</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
 <div class="viewcode-block" id="four1_forward">
 <a class="viewcode-back" href="../../dither_updated.html#dither.updated.four1_forward">[docs]</a>
-<span class="k">def</span> <span class="nf">four1_forward</span><span class="p">(</span><span class="n">a</span><span class="p">):</span> 
+<span class="k">def</span><span class="w"> </span><span class="nf">four1_forward</span><span class="p">(</span><span class="n">a</span><span class="p">):</span> 
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Perform a 1D forward complex-to-complex FFT using NumPy.</span>
 
@@ -137,7 +137,7 @@
 
 <div class="viewcode-block" id="four1_backward">
 <a class="viewcode-back" href="../../dither_updated.html#dither.updated.four1_backward">[docs]</a>
-<span class="k">def</span> <span class="nf">four1_backward</span><span class="p">(</span><span class="n">a_hat</span><span class="p">):</span> 
+<span class="k">def</span><span class="w"> </span><span class="nf">four1_backward</span><span class="p">(</span><span class="n">a_hat</span><span class="p">):</span> 
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Perform a 1D backward complex-to-complex FFT using NumPy.</span>
 
@@ -168,7 +168,7 @@
 
 <div class="viewcode-block" id="realft_forward">
 <a class="viewcode-back" href="../../dither_updated.html#dither.updated.realft_forward">[docs]</a>
-<span class="k">def</span> <span class="nf">realft_forward</span><span class="p">(</span><span class="n">a</span><span class="p">):</span> 
+<span class="k">def</span><span class="w"> </span><span class="nf">realft_forward</span><span class="p">(</span><span class="n">a</span><span class="p">):</span> 
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Perform a 1D forward real-to-complex FFT using NumPy.</span>
 
@@ -195,7 +195,7 @@
 
 <div class="viewcode-block" id="realft_backward">
 <a class="viewcode-back" href="../../dither_updated.html#dither.updated.realft_backward">[docs]</a>
-<span class="k">def</span> <span class="nf">realft_backward</span><span class="p">(</span><span class="n">a_hat</span><span class="p">):</span> 
+<span class="k">def</span><span class="w"> </span><span class="nf">realft_backward</span><span class="p">(</span><span class="n">a_hat</span><span class="p">):</span> 
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Perform a 1D backward complex-to-real FFT using NumPy.</span>
 
@@ -226,7 +226,7 @@
 
 <div class="viewcode-block" id="real2dfft_forward">
 <a class="viewcode-back" href="../../dither_updated.html#dither.updated.real2dfft_forward">[docs]</a>
-<span class="k">def</span> <span class="nf">real2dfft_forward</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">real2dfft_forward</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Perform a 2D forward real-to-complex FFT using NumPy.</span>
 
@@ -256,7 +256,7 @@
 
 <div class="viewcode-block" id="real2dfft_backward">
 <a class="viewcode-back" href="../../dither_updated.html#dither.updated.real2dfft_backward">[docs]</a>
-<span class="k">def</span> <span class="nf">real2dfft_backward</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">real2dfft_backward</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Perform a 2D backward complex-to-real FFT using NumPy.</span>
 
@@ -290,11 +290,11 @@
 
 <span class="n">PI</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span>
 <span class="n">RADIOAN</span> <span class="o">=</span> <span class="n">PI</span><span class="o">/</span><span class="mi">180</span>
-<span class="n">NSTMAX</span> <span class="o">=</span> <span class="mi">140</span>
+<span class="n">NSTMAX</span> <span class="o">=</span> <span class="mi">1400</span>
 <span class="n">NDIV</span> <span class="o">=</span> <span class="mi">3</span>
 
-<span class="kn">from</span> <span class="nn">.wrapper</span> <span class="kn">import</span> <span class="n">NR_FREQ</span><span class="p">,</span> <span class="n">NC_FREQ</span>
-<span class="kn">from</span> <span class="nn">.wrapper</span> <span class="kn">import</span> <span class="n">set_padding_size</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.wrapper</span><span class="w"> </span><span class="kn">import</span> <span class="n">NR_FREQ</span><span class="p">,</span> <span class="n">NC_FREQ</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.wrapper</span><span class="w"> </span><span class="kn">import</span> <span class="n">set_padding_size</span>
 <span class="n">NSUB</span> <span class="o">=</span> <span class="mi">2</span>
 
 <span class="n">NC</span><span class="p">,</span> <span class="n">NR</span> <span class="o">=</span> <span class="mi">2</span><span class="o">**</span><span class="mi">9</span><span class="o">+</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="o">**</span><span class="mi">9</span>
@@ -302,7 +302,7 @@
 
 <div class="viewcode-block" id="phase_updated">
 <a class="viewcode-back" href="../../dither_updated.html#dither.updated.phase_updated">[docs]</a>
-<span class="k">def</span> <span class="nf">phase_updated</span><span class="p">(</span><span class="n">A_in</span><span class="p">,</span> <span class="n">offsets</span><span class="p">,</span> <span class="n">npos</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">phase_updated</span><span class="p">(</span><span class="n">A_in</span><span class="p">,</span> <span class="n">offsets</span><span class="p">,</span> <span class="n">npos</span><span class="p">):</span>
     <span class="n">A</span> <span class="o">=</span> <span class="n">A_in</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
     <span class="n">phix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">NSTMAX</span><span class="p">)</span>
     <span class="n">phasem</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">NDIV</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">NDIV</span><span class="o">**</span><span class="mi">2</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">complex128</span><span class="p">)</span>
@@ -512,7 +512,7 @@
 
 <div class="viewcode-block" id="phase_shift">
 <a class="viewcode-back" href="../../dither_updated.html#dither.updated.phase_shift">[docs]</a>
-<span class="k">def</span> <span class="nf">phase_shift</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">offsets</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">phase_shift</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">offsets</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Apply phase shifts to the input data.</span>
 
