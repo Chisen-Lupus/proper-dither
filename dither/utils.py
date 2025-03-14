@@ -34,6 +34,8 @@ Example Usage:
     x, y = get_centroids_using_DAOStarFinder(data, center_x, center_y)
 """
 
+import copy
+
 import numpy as np
 
 from astropy.wcs import WCS
@@ -41,11 +43,19 @@ from astropy.io import fits
 from astropy.nddata import Cutout2D
 from astropy.stats import sigma_clipped_stats
 from astropy.convolution import convolve, Box2DKernel
+from astropy.coordinates import SkyCoord
+from astropy.wcs import WCS
+from astropy.modeling.models import Shift
+import astropy.units as u
 
-from scipy.ndimage import label
+from scipy.ndimage import label, zoom, gaussian_filter, shift
 
 from photutils.detection import DAOStarFinder
 from photutils.centroids import centroid_com
+
+from jwst.datamodels import ImageModel
+
+import gwcs
 
 # TODO: naming convention of the functions
 # TODO: delete comments and add documentations
@@ -199,7 +209,8 @@ def create_cutout_fits(fits_path, cutout_path, coord, radius):
         new_hdul.writeto(cutout_path, overwrite=False)
         print(f"Cutout saved to {cutout_path}")
 
-def get_centroids_using_DAOStarFinder(data, center_x, center_y):
+def get_centroids_using_DAOStarFinder(data, center_x, center_y, radius=30, snr=20, 
+                                      return_flux=False):
     """
     Find centroids of stars using DAOStarFinder near a specified center.
 
@@ -211,21 +222,37 @@ def get_centroids_using_DAOStarFinder(data, center_x, center_y):
         X-coordinate of the center.
     center_y : float
         Y-coordinate of the center.
+    radius : float, optional
+        Searching radius (default is 30 pixels).
+    snr : float, optional
+        Minimum SNR needed for the star finder.
 
     Returns
     -------
     tuple
-        X and Y coordinates of the centroid closest to the specified center.
+        X and Y coordinates of the brightest centroid within the specified radius.
     """
     mean, median, std = sigma_clipped_stats(data, sigma=3.0)
-    daofind = DAOStarFinder(fwhm=3.0, threshold=20.0*std)
-    sources = daofind(data - median)
-    # print(len(sources))
-    distances_to_center = (sources['xcentroid'] - center_x)**2 + (sources['ycentroid'] - center_y)**2
-    source = sources[distances_to_center==np.min(distances_to_center)][0]
-    x = source['xcentroid']
-    y = source['ycentroid']
-    return x, y
+    daofind = DAOStarFinder(fwhm=3.0, threshold=snr*std)
+    # sources = daofind(data - median)
+    sources = daofind(data)
+    if len(sources) == 0:
+        raise ValueError("No sources found within the specified SNR.") 
+    # Compute distances to the center
+    distances = np.sqrt((sources['xcentroid'] - center_x)**2 + (sources['ycentroid'] - center_y)**2)
+    # Filter sources within the given radius
+    mask = distances<=radius
+    filtered_sources = sources[mask]
+    # print(filtered_sources)
+    if len(filtered_sources) == 0:
+        raise ValueError("No sources found within the specified radius.")  
+    # Find the brightest source within the radius
+    brightest_source = filtered_sources[np.argmax(filtered_sources['flux'])]
+    if return_flux: 
+        return np.array([brightest_source['xcentroid'], brightest_source['ycentroid']]), sources, brightest_source['flux']
+    else:  
+        return np.array([brightest_source['xcentroid'], brightest_source['ycentroid']]), sources
+
 
 def get_centroids_using_centroid_com(data, center_x, center_y, r):
     """
@@ -279,7 +306,7 @@ def get_brightest_pixel(data, xmin=None, xmax=None, ymin=None, ymax=None):
     if not xmax: xmax=data.shape[0]
     if not ymax: ymax=data.shape[1]
     data_slice = data[xmin:xmax, ymin:ymax]
-    y, x = np.where(data_slice==np.max(data_slice))
+    x, y = np.where(data_slice==np.max(data_slice))
     return [x[0]+xmin, y[0]+ymin]
 
 def calculate_padding_radius(centroids_int):
@@ -330,7 +357,33 @@ def pad_image_with_centroid(data, pad, centroid_int):
     aligned_data[dx:dx+nx, dy:dy+ny] = data
     return aligned_data
 
-def get_cosmic_ray_mask_without_AGN(image_data, kernel_size=3, sigma_threshold=5, max_connected_pixels=12):
+def crop_image_with_centroid(data, radius, centroid_int):
+    """
+    Crop an image around a specified centroid.
+
+    Parameters
+    ----------
+    data : ndarray
+        Input 2D image data.
+    radius : int
+        Cropping radius.
+    centroid_int : tuple
+        Integer centroid coordinates (x, y).
+
+    Returns
+    -------
+    ndarray
+        Cropped image.
+    """
+    x, y = centroid_int
+    x_min = max(0, x - radius)
+    x_max = min(data.shape[0], x + radius)
+    y_min = max(0, y - radius)
+    y_max = min(data.shape[1], y + radius)
+    
+    return data[x_min:x_max, y_min:y_max]
+
+def get_cosmic_ray_mask_without_AGN(image_data, kernel_size=3, sigma_threshold=5, max_connected_pixels=12, avoid=None):
     """
     Detect cosmic rays in an image based on pixel differences from a smoothed version,
     while ignoring regions connected by more than a certain number of pixels.
@@ -367,6 +420,10 @@ def get_cosmic_ray_mask_without_AGN(image_data, kernel_size=3, sigma_threshold=5
     
     # Create a mask where the difference exceeds the threshold
     cosmic_ray_mask = diff > threshold
+
+    # avoid region
+    xmin, xmax, ymin, ymax = avoid
+    cosmic_ray_mask[xmin:xmax, ymin:ymax] = False
     
     # Label connected components in the mask
     labeled_array, num_features = label(cosmic_ray_mask)
@@ -441,3 +498,133 @@ def extract_central_region(image, fraction=0.1, radius=None, center=None):
     ]
 
     return cutout
+
+
+def create_jwst_cutout_fits(fits_path, cutout_path, coord, radius):
+    """
+    Create a cutout from a JWST ImageModel FITS file and save it as a new FITS file.
+
+    Parameters
+    ----------
+    fits_path : str
+        Path to the input FITS file.
+    cutout_path : str
+        Path to save the cutout FITS file.
+    coord : SkyCoord
+        Center coordinate of the cutout.
+    radius : float
+        Radius of the cutout in arcseconds.
+
+    Returns
+    -------
+    None
+    """
+    with ImageModel(fits_path) as model:
+        # Extract WCS from JWST ImageModel
+        original_wcs = model.meta.wcs  
+
+        # Convert coordinate to pixel values
+        x, y = original_wcs.world_to_array_index(coord)
+
+        # Get pixel scale and compute cutout size
+        pixel_scale = 0.063 if model.meta.instrument.channel=='LONG' else 0.031
+        radius_pix = int(radius / pixel_scale)
+        size = (radius_pix * 2, radius_pix * 2)    
+        cutout_x, cutout_y = x, y  # Cutout center
+        cutout_size_x, cutout_size_y = size  # Cutout size
+
+        # Get the original bounding box (pixel range)
+        (x_min, x_max), (y_min, y_max) = original_wcs.bounding_box
+        # print((x_min, x_max), (y_min, y_max))
+        # print(x, y)
+
+
+
+        # Define new bounding box for the cutout
+        new_x_min = max(x_min, cutout_x - cutout_size_x // 2 - 0.5)
+        new_x_max = min(x_max, cutout_x + cutout_size_x // 2 - 0.5)
+        new_y_min = max(y_min, cutout_y - cutout_size_y // 2 - 0.5)
+        new_y_max = min(y_max, cutout_y + cutout_size_y // 2 - 0.5)
+        # print([int(new_y_min+0.5),int(new_y_max+0.5), int(new_x_min+0.5),int(new_x_max+0.5)])
+
+        # Create the new WCS    
+        detector_frame = original_wcs.input_frame  # Detector frame
+        sky_frame = original_wcs.output_frame  # Sky frame
+        forward_transform = original_wcs.forward_transform  # Original transform
+
+        # Compute the reference pixel shift
+        x_shift = new_y_min  # x_min, y_min are the lower-left pixel coordinates of the cutout in original image
+        y_shift = new_x_min
+
+        # Apply shift in the detector frame
+        shifted_transform = (Shift(x_shift) & Shift(y_shift)) | forward_transform
+
+        # Create a new GWCS using the updated transform
+        cutout_wcs = gwcs.WCS(forward_transform=shifted_transform,
+                        input_frame=detector_frame,
+                        output_frame=sky_frame)
+
+        # Assign the new GWCS to the cutout model
+        cutout_wcs.bounding_box = ((new_x_min, new_x_max), (new_y_min, new_y_max))
+        new_transform = (Shift(-new_x_min) & Shift(-new_y_min)) | original_wcs.forward_transform
+        # cutout_wcs._pipeline = [('shift', new_transform)]
+        
+
+        # Create a new cutout model
+        cutout_model = copy.deepcopy(model)
+        cutout_model.meta.wcs = cutout_wcs  # Assign updated GWCS
+        # cutout_model.meta.instrument = model.meta.instrument  # Preserve metadata
+        # NOTE: change both gwcs and wcs
+        cutout_model.meta.wcsinfo.crpix1 -= new_y_min
+        cutout_model.meta.wcsinfo.crpix2 -= new_x_min
+        
+
+        # Copy data layers
+        for hdu_name in ['data', 'err', 'dq', 'area', 'var_poisson', 'var_rnoise', 'var_flat']:
+            if hasattr(model, hdu_name) and getattr(model, hdu_name) is not None:
+                cutout_data = getattr(model, hdu_name)[
+                    int(new_x_min+0.5):int(new_x_max+0.5),
+                    int(new_y_min+0.5):int(new_y_max+0.5)
+                ]
+                setattr(cutout_model, hdu_name, cutout_data)
+
+        # Save the cutout as a JWST-compatible FITS file
+        cutout_model.save(cutout_path, overwrite=True)
+        print(f"Cutout saved to {cutout_path}")
+
+
+def zoom_with_nan_handling(array, zoom_factor):
+    """Zoom an array while handling NaN values properly."""
+    nan_mask = np.isnan(array)
+
+    # Fill NaNs with interpolated values (Gaussian smoothing)
+    array_filled = np.copy(array)
+    array_filled[nan_mask] = 0  # Temporary fill
+    array_filled = gaussian_filter(array_filled, sigma=1, mode='nearest')
+
+    # Apply zoom
+    zoomed_array = zoom(array_filled, zoom_factor, order=1) / (zoom_factor**2)  # Keep flux scaling
+
+    # Apply zoom to NaN mask and restore NaNs
+    zoomed_mask = zoom(nan_mask.astype(float), zoom_factor, order=0) > 0.5  # Nearest neighbor
+    zoomed_array[zoomed_mask] = np.nan
+    
+    return zoomed_array
+
+def shift_with_nan_handling(array, shift_values, order=3):
+    """Shift an array while preserving NaN values."""
+    nan_mask = np.isnan(array)
+
+    # Fill NaNs with interpolated values
+    array_filled = np.copy(array)
+    array_filled[nan_mask] = 0  # Temporary fill
+    array_filled = gaussian_filter(array_filled, sigma=1, mode='nearest')
+
+    # Apply shift
+    shifted_array = shift(array_filled, shift=shift_values, order=order, mode='nearest')
+
+    # Apply shift to NaN mask and restore NaNs
+    shifted_mask = shift(nan_mask.astype(float), shift=shift_values, order=0, mode='nearest') > 0.5
+    shifted_array[shifted_mask] = np.nan
+
+    return shifted_array

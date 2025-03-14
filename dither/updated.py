@@ -198,7 +198,7 @@ def real2dfft_backward(data):
 
 PI = np.pi
 RADIOAN = PI/180
-NSTMAX = 140
+NSTMAX = 1400
 NDIV = 3
 
 from .wrapper import NR_FREQ, NC_FREQ
