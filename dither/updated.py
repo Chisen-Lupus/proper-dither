@@ -198,8 +198,8 @@ def real2dfft_backward(data):
 
 PI = np.pi
 RADIOAN = PI/180
-NDIV = 3
 NSUB = 2
+NDIV = NSUB
 NC_FREQ = 514 # must be 2**N + 2
 NR_FREQ = 512 # must be 2**N
 NC_SPAT = NC_FREQ
@@ -233,7 +233,7 @@ def phase(A_in, nrow, ncol, DR, DC, offsets, npos):
 
     Returns
     -------
-    ndarray
+    ndarraygit 
         Modified 2D array after phase adjustment and transformation.
     """
     # TODO: check if they are all in use
@@ -269,6 +269,8 @@ def phase(A_in, nrow, ncol, DR, DC, offsets, npos):
     isy = 0
     isec = 0
 
+    print('iy', list(range(isy, isy+nsy)))
+    print('ix', list(range(0, nsx)))
     for iy in range(isy, isy+nsy): 
         for ix in range(0, nsx): 
 
@@ -276,50 +278,36 @@ def phase(A_in, nrow, ncol, DR, DC, offsets, npos):
 
             # LINE 304
 
-            for nim in range(npp):
-                px = -phix[nim]*2/NSUB
-                py = -phiy[nim]*2/NSUB
-                nuin = ix - (NSUB - 1)//2
-                nvin = iy
-                pxi = nuin*px
-                pyi = -nvin*py
-                # print('pxi', pxi, 'pyi', pyi)
+                
+            # Precompute normalized phase shifts
+            px = -2 * phix / NSUB
+            py = -2 * phiy / NSUB
 
-                isat = 0
-                for isaty in range(NSUB):
-                    for isatx in range(NSUB): 
-                        # print(isaty, isatx)
-                        phit = isatx*px + pxi + isaty*py + pyi
-                        # print(isat-1, nim, phit)
-                        phases[isat, nim] = (np.cos(phit) + np.sin(phit)*1j)/NSUB**2
-                        isat += 1
-                    #     break
-                    # break
+            # Compute base indices and initial phases
+            nuin = ix - (NSUB - 1) // 2
+            nvin = iy
+            pxi = nuin * px
+            pyi = -nvin * py
 
-                # LINE 344 - Pivot if required so that the fundamental is always in column 1
+            # Generate sub-grid indices
+            isatx, isaty = np.meshgrid(np.arange(NSUB), np.arange(NSUB))
+            isatx = isatx.flatten()
+            isaty = isaty.flatten()
 
-                nfund =  NSUB*nvin - nuin
-                # print('Fundamental', nfund)
-                temp = phases[0, nim]
-                # print(nfund, nim, nvin, nuin)
-                phases[0, nim] = phases[nfund, nim]
-                phases[nfund, nim] = temp
+            # Calculate total phase using broadcasting
+            phit = np.outer(isatx, px) + pxi + np.outer(isaty, py) + pyi
 
-            # print(iy, ix, phases[:4, :4].real)
-            # vec[:4, :4] = la.inv(phases[:4, :4])
-            # print(vec.shape, phases.shape)
-            # plt.imshow(phases[:9, :9].real)
+            # Compute complex phases and normalize
+            phases = (np.cos(phit) + 1j * np.sin(phit)) / NSUB**2
+
+            # Pivot the fundamental component to the first row
+            nfund = NSUB * nvin - nuin
+            phases[[0, nfund], :] = phases[[nfund, 0], :]
 
             # LINE 355 - This loads an identity matrix, which will be used to invert the phase matrix.
-            
-            for i in range(NSUB**2): 
-                for j in range(NSUB**2):
-                    vec[j, i] = 0+0j
-                vec[i, i] = 1+0j
-                key[i] = i+1
-            
-            
-            # vec[:4, :4] = la.inv(phases[:4, :4])
+
+            vec = np.eye(NSUB**2, dtype=np.complex128)
+            key = np.arange(1, NSUB**2+1)
 
             ### BEGIN MATRIX INVERSION
 
@@ -332,9 +320,9 @@ def phase(A_in, nrow, ncol, DR, DC, offsets, npos):
                 phasem = phases
 
             print('BEGIN MATRIX INVERSION', vec.shape, phasem.shape)
-            print(vec[:4, :4])
-            print(phasem[:4, :4])
-            print(phases[:4, :4])
+            print(vec)
+            print(phasem)
+            print(phases)
             # LINE 367 - If N>nsub2, then the problem is over determined
 
             # LINE 391 - solve for the data vector phases
@@ -374,7 +362,7 @@ def phase(A_in, nrow, ncol, DR, DC, offsets, npos):
                     # LINE 436 - Any pivoting required is now completed
 
                     # print(i, j, 'phasem', phasem[i-1, i-1])
-                    # print(phasem[:4, :4])
+                    # print(phasem)
                     rat = phasem[i-1, j-1]/phasem[i-1, i-1]
                     for k in range(i, NSUB**2+1): 
                         phasem[k-1, j-1] -= rat*phasem[k-1, i-1]
@@ -389,7 +377,7 @@ def phase(A_in, nrow, ncol, DR, DC, offsets, npos):
                 for j in range(1, NSUB**2+1):
                     # print('rat', rat, i, phasem[i-1, i-1])
                     # print(phasem)
-                    # print(phases[:4, :4]==0)
+                    # print(phases==0)
                     vec[j-1, i-1] /= rat
                 for j in range(i-1, 0, -1):
                     rat = phasem[i-1, j-1]
@@ -401,11 +389,11 @@ def phase(A_in, nrow, ncol, DR, DC, offsets, npos):
             # LINE 467 - The vec array now holds the inverse of the original phasem array.
 
             print('END MATRIX INVERSION', vec.shape, phasem.shape)
-            print(vec[:4, :4])
-            print(phasem[:4, :4])
-            print(phases[:4, :4])
-            # print(vec[:4, :4]@phasem[:4, :4])
-            print(vec[:4, :4]@phasem[:4, :4])
+            print(vec)
+            print(phasem)
+            print(phases)
+            # print(vec@phasem)
+            print(vec@phasem)
             print()
 
             ### END MATRIX INVERSION
