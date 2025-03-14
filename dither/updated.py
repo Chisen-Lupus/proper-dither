@@ -306,11 +306,6 @@ def phase(A_in, nrow, ncol, DR, DC, offsets, npos):
 
             # LINE 355 - This loads an identity matrix, which will be used to invert the phase matrix.
 
-            vec = np.eye(NSUB**2, dtype=np.complex128)
-            key = np.arange(1, NSUB**2+1)
-
-            ### BEGIN MATRIX INVERSION
-
 
             # LINE 371 - The weighting factor is used at this point.
 
@@ -318,99 +313,8 @@ def phase(A_in, nrow, ncol, DR, DC, offsets, npos):
                 phasem = phases @ np.diag(wt) @ np.conj(phases).T
             else: 
                 phasem = phases
-
-            print('BEGIN MATRIX INVERSION', vec.shape, phasem.shape)
-            print(vec)
-            print(phasem)
-            print(phases)
-            # LINE 367 - If N>nsub2, then the problem is over determined
-
-            # LINE 391 - solve for the data vector phases
-
-            for i in range(1, NSUB**2-1+1): 
-                for j in range(i+1, NSUB**2+1): 
-
-                    # LINE 396 - Check for zero division and pivot if required.
-
-                    # print(phasem)#, la.inv(phasem))
-                    # print(i, phasem[i, i]*np.conj(phasem[i, i])==0)
-                    if (phasem[i-1, i-1]*np.conj(phasem[i-1, i-1])==0): 
-                        pivot = False
-                        k = i+1
-                        while (not pivot) and (k<=NSUB**2): 
-                            if (phasem[i-1, k-1]*np.conj(phasem[i-1, k-1])!=0): 
-                                
-                                pivot = True
-                                itemp = key[i-1]
-                                key[i-1] = key[k-1]
-                                key[k-1] = itemp
-                                for kk in range(1, NSUB**2+1): 
-                                    temp = phasem[kk-1, i-1]
-                                    phasem[kk-1, i-1] = phasem[kk-1, k-1]
-                                    phasem[kk-1, k-1] = temp
-                                    temp = vec[kk-1, i-1]
-                                    vec[kk-1, i-1] = vec[kk-1, k-1]
-                                    vec[kk-1, k-1] = temp
-                            else: 
-                                k += 1
-
-                        if not pivot: 
-                            raise ValueError('singular phase matrix')
-                    
-                    # if phasem[i-1, i-1]==0: return
-
-                    # LINE 436 - Any pivoting required is now completed
-
-                    # print(i, j, 'phasem', phasem[i-1, i-1])
-                    # print(phasem)
-                    rat = phasem[i-1, j-1]/phasem[i-1, i-1]
-                    for k in range(i, NSUB**2+1): 
-                        phasem[k-1, j-1] -= rat*phasem[k-1, i-1]
-                    for k in range(1, NSUB**2+1): 
-                        vec[k-1, j-1] -= rat*vec[k-1, i-1]
-                    # print(i, phasem[i, i])
-                    # print(phasem)
-                # return
-            
-            for i in range(NSUB**2, 1, -1):
-                rat = phasem[i-1, i-1]
-                for j in range(1, NSUB**2+1):
-                    # print('rat', rat, i, phasem[i-1, i-1])
-                    # print(phasem)
-                    # print(phases==0)
-                    vec[j-1, i-1] /= rat
-                for j in range(i-1, 0, -1):
-                    rat = phasem[i-1, j-1]
-                    for k in range(1, NSUB**2+1):
-                        vec[k-1, j-1] -= rat*vec[k-1, i-1]
-            for j in range(1, NSUB**2+1):
-                vec[j-1, 0] /= phasem[0, 0]
-
-            # LINE 467 - The vec array now holds the inverse of the original phasem array.
-
-            print('END MATRIX INVERSION', vec.shape, phasem.shape)
-            print(vec)
-            print(phasem)
-            print(phases)
-            # print(vec@phasem)
-            print(vec@phasem)
-            print()
-
-            ### END MATRIX INVERSION
-
-            # LINE 469 - If any pivoting has been done, undo it.
-
-            for i in range(1, NSUB**2+1):
-                if key[i-1]!=i: 
-                    k = i+1
-                    # print(key)
-                    while (key[k-1]!=i) and (k<NSUB**2): 
-                        k += 1
-                    for kk in range(1, NSUB**2+1):
-                        temp = vec[kk-1, i-1]
-                        vec[kk-1, i-1] = vec[kk-1, k-1]
-                        vec[kk-1, k-1] = temp
-                    key[k-1] = key[i-1]
+                
+            vec = np.linalg.inv(phasem)
 
             # # LINE 490 - For NSUB2 images, we are done
             
