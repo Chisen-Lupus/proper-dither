@@ -204,11 +204,8 @@ NC_FREQ = 514 # must be 2**N + 2
 NR_FREQ = 512 # must be 2**N
 NC_SPAT = NC_FREQ
 NR_SPAT = NR_FREQ # must be 2**N
-DR = 0
-DC = 0
 
-
-def phase(A_in, nrow, ncol, DR, DC, offsets, npos):
+def phase(A_in, offsets, npos):
     """
     Apply phase shifts and calculate coefficients for Fourier-based image transformations.
 
@@ -216,16 +213,6 @@ def phase(A_in, nrow, ncol, DR, DC, offsets, npos):
     ----------
     A_in : ndarray
         Input 2D array representing the Fourier-transformed data.
-    nrow : int
-        Number of rows in the data.
-    ncol : int
-        Number of columns in the data.
-    shift : bool
-        Whether to apply a global phase shift based on `DR` and `DC`.
-    DR : float
-        Row shift factor.
-    DC : float
-        Column shift factor.
     offsets : ndarray
         Array of offsets and weights, with shape (n, 3), where the columns are x-offset, y-offset, and weight.
     npos : int
@@ -269,8 +256,8 @@ def phase(A_in, nrow, ncol, DR, DC, offsets, npos):
     isy = 0
     isec = 0
 
-    print('iy', list(range(isy, isy+nsy)))
-    print('ix', list(range(0, nsx)))
+    # print('iy', list(range(isy, isy+nsy)))
+    # print('ix', list(range(0, nsx)))
     for iy in range(isy, isy+nsy): 
         for ix in range(0, nsx): 
 
@@ -348,8 +335,8 @@ def phase(A_in, nrow, ncol, DR, DC, offsets, npos):
     # LINE 516 - apply the complex scale factor to the transform
 
     isec = 0
-    isv = nrow//2
-    iev = isv - nrow//NSUB + 1 
+    isv = NR_FREQ//2
+    iev = isv - NR_FREQ//NSUB + 1 
     # print(A)
     # print('phix', phix)
     # print('phiy', phiy)
@@ -358,8 +345,8 @@ def phase(A_in, nrow, ncol, DR, DC, offsets, npos):
     # print(nsx)
     # print(isv-(iev-1))
     for iy in range(isy, isy+nsy):
-        ieu = ncol - (NSUB - 1)*(nsx - 1)*ncol//NSUB
-        # print(ieu) # TODO: verify that ieu==ncol if nsx = 1
+        ieu = NC_FREQ - (NSUB - 1)*(nsx - 1)*NC_FREQ//NSUB
+        # print(ieu) # TODO: verify that ieu==NC_FREQ if nsx = 1
         isu = 1
         for ix in range(0, nsx):
             isec += 1
@@ -370,15 +357,15 @@ def phase(A_in, nrow, ncol, DR, DC, offsets, npos):
 
             # Compute the normalized row positions (V)
             rows = np.arange(isv, iev-1, -1)
-            rows = np.where(rows > 0, rows, nrow + rows)
-            V = np.where(rows > nrow // 2, (rows - nrow - 1) / nrow, (rows - 1) / nrow)
+            rows = np.where(rows > 0, rows, NR_FREQ + rows)
+            V = np.where(rows > NR_FREQ // 2, (rows - NR_FREQ - 1) / NR_FREQ, (rows - 1) / NR_FREQ)
 
             # Compute the row phase shift (as a complex exponential)
             rphase = np.exp(-2j * phiy[npos-1] * V)
 
             # Compute the normalized column positions (U)
             cols = np.arange(isu, ieu + 1, 2)
-            U = (cols - 1) / (ncol - 2) / 2
+            U = (cols - 1) / (NC_FREQ - 2) / 2
 
             # Compute the column phase shift (as a complex exponential)
             cphase = np.exp(-2j * phix[npos-1] * U)
@@ -394,11 +381,11 @@ def phase(A_in, nrow, ncol, DR, DC, offsets, npos):
             A[1::2, :] = A_complex.imag
             
             isu = ieu + 1
-            ieu = ncol - (nsx - 2 - ix)*ncol//NSUB # TODO: check values
+            ieu = NC_FREQ - (nsx - 2 - ix)*NC_FREQ//NSUB # TODO: check values
         isv = iev - 1
-        iev = isv - nrow//NSUB + 1 # TODO: check values
+        iev = isv - NR_FREQ//NSUB + 1 # TODO: check values
         if iy==(isy + nsy - 2): 
-            iev = -(nrow//2) + 1 # NOTE: add a bracket to change negative sign to minus sign
+            iev = -(NR_FREQ//2) + 1 # NOTE: add a bracket to change negative sign to minus sign
 
     # print(vec)
     # print(phasem)
