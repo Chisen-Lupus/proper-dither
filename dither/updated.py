@@ -198,23 +198,55 @@ def real2dfft_backward(data):
 
 PI = np.pi
 RADIOAN = PI/180
-NSTMAX = 1400
 NDIV = 3
-
-from .wrapper import NR_FREQ, NC_FREQ
-from .wrapper import set_padding_size
 NSUB = 2
+NC_FREQ = 514 # must be 2**N + 2
+NR_FREQ = 512 # must be 2**N
+NC_SPAT = NC_FREQ
+NR_SPAT = NR_FREQ # must be 2**N
+DR = 0
+DC = 0
 
-NC, NR = 2**9+2, 2**9
-set_padding_size(NC, NR)
 
-def phase_updated(A_in, offsets, npos):
+def phase(A_in, nrow, ncol, DR, DC, offsets, npos):
+    """
+    Apply phase shifts and calculate coefficients for Fourier-based image transformations.
+
+    Parameters
+    ----------
+    A_in : ndarray
+        Input 2D array representing the Fourier-transformed data.
+    nrow : int
+        Number of rows in the data.
+    ncol : int
+        Number of columns in the data.
+    shift : bool
+        Whether to apply a global phase shift based on `DR` and `DC`.
+    DR : float
+        Row shift factor.
+    DC : float
+        Column shift factor.
+    offsets : ndarray
+        Array of offsets and weights, with shape (n, 3), where the columns are x-offset, y-offset, and weight.
+    npos : int
+        Index of the position for which the coefficients are computed.
+
+    Returns
+    -------
+    ndarray
+        Modified 2D array after phase adjustment and transformation.
+    """
+    # TODO: check if they are all in use
     A = A_in.copy()
-    phix = np.zeros(NSTMAX)
+    NST = len(offsets)
+    phix = np.zeros(NST)
+    # spr, spi, rpr, rpi, cpr, cpi, ypr, ypi, tpr, tpi = 0
+    # fr, fi = 0
     phasem = np.zeros((NDIV**2, NDIV**2), dtype=np.complex128)
     vec = np.zeros((NDIV**2, NDIV**2), dtype=np.complex128)
     coef = np.zeros((NDIV**2), dtype=np.complex128)
-    phases = np.zeros((NDIV**2, NSTMAX), dtype=np.complex128)
+    phases = np.zeros((NDIV**2, NST), dtype=np.complex128)
+    # row, col, vrow = 0
     key = np.zeros(NDIV**2)
     
     # LINE 247 - read offsets (totally different from the original code)
@@ -251,47 +283,59 @@ def phase_updated(A_in, offsets, npos):
                 nvin = iy
                 pxi = nuin*px
                 pyi = -nvin*py
+                # print('pxi', pxi, 'pyi', pyi)
 
                 isat = 0
-                for isaty in range(0, NSUB):
-                    for isatx in range(0, NSUB): 
-                        isat += 1
+                for isaty in range(NSUB):
+                    for isatx in range(NSUB): 
+                        # print(isaty, isatx)
                         phit = isatx*px + pxi + isaty*py + pyi
-                        phases[isat-1, nim] = (np.cos(phit) + np.sin(phit)*1j)/NSUB**2
+                        # print(isat-1, nim, phit)
+                        phases[isat, nim] = (np.cos(phit) + np.sin(phit)*1j)/NSUB**2
+                        isat += 1
+                    #     break
+                    # break
 
                 # LINE 344 - Pivot if required so that the fundamental is always in column 1
 
-                nfund = 1 + NSUB*nvin - nuin
-                print('Fundamental', nfund)
+                nfund =  NSUB*nvin - nuin
+                # print('Fundamental', nfund)
                 temp = phases[0, nim]
-                phases[0, nim] = phases[nfund-1, nim]
-                phases[nfund-1, nim] = temp
+                # print(nfund, nim, nvin, nuin)
+                phases[0, nim] = phases[nfund, nim]
+                phases[nfund, nim] = temp
+
+            # print(iy, ix, phases[:4, :4].real)
+            # vec[:4, :4] = la.inv(phases[:4, :4])
+            # print(vec.shape, phases.shape)
+            # plt.imshow(phases[:9, :9].real)
 
             # LINE 355 - This loads an identity matrix, which will be used to invert the phase matrix.
             
-            vec = np.eye(NDIV**2, dtype=np.complex128)
-            key = np.arange(NSUB**2) + 1
+            for i in range(NSUB**2): 
+                for j in range(NSUB**2):
+                    vec[j, i] = 0+0j
+                vec[i, i] = 1+0j
+                key[i] = i+1
             
-            # print(phases)
-            # vec[:9, :4] = la.pinv(phases[:4, :9])
+            
+            # vec[:4, :4] = la.inv(phases[:4, :4])
 
             ### BEGIN MATRIX INVERSION
 
-            # LINE 367 - If N>nsub2, then the problem is over determined
 
             # LINE 371 - The weighting factor is used at this point.
 
             if npp>NSUB**2: 
-                # print('npp>NSUB**2')
-                for i in range(1, NSUB**2+1): 
-                    for j in range(1, NSUB**2+1): 
-                        phasem[j-1, i-1] = 0+0j
-                        for k in range(1, npp+1): 
-                            phasem[j-1, i-1] += np.conj(phases[i-1, k-1])*wt[k-1]*phases[j-1, k-1]
+                phasem = phases @ np.diag(wt) @ np.conj(phases).T
             else: 
-                for i in range(1, NSUB**2+1): 
-                    for j in range(1, NSUB**2+1): 
-                        phasem[j-1, i-1] = phases[j-1, i-1]
+                phasem = phases
+
+            print('BEGIN MATRIX INVERSION', vec.shape, phasem.shape)
+            print(vec[:4, :4])
+            print(phasem[:4, :4])
+            print(phases[:4, :4])
+            # LINE 367 - If N>nsub2, then the problem is over determined
 
             # LINE 391 - solve for the data vector phases
 
@@ -300,6 +344,8 @@ def phase_updated(A_in, offsets, npos):
 
                     # LINE 396 - Check for zero division and pivot if required.
 
+                    # print(phasem)#, la.inv(phasem))
+                    # print(i, phasem[i, i]*np.conj(phasem[i, i])==0)
                     if (phasem[i-1, i-1]*np.conj(phasem[i-1, i-1])==0): 
                         pivot = False
                         k = i+1
@@ -322,18 +368,28 @@ def phase_updated(A_in, offsets, npos):
 
                         if not pivot: 
                             raise ValueError('singular phase matrix')
+                    
+                    # if phasem[i-1, i-1]==0: return
 
                     # LINE 436 - Any pivoting required is now completed
 
+                    # print(i, j, 'phasem', phasem[i-1, i-1])
+                    # print(phasem[:4, :4])
                     rat = phasem[i-1, j-1]/phasem[i-1, i-1]
                     for k in range(i, NSUB**2+1): 
                         phasem[k-1, j-1] -= rat*phasem[k-1, i-1]
                     for k in range(1, NSUB**2+1): 
                         vec[k-1, j-1] -= rat*vec[k-1, i-1]
+                    # print(i, phasem[i, i])
+                    # print(phasem)
+                # return
             
             for i in range(NSUB**2, 1, -1):
                 rat = phasem[i-1, i-1]
                 for j in range(1, NSUB**2+1):
+                    # print('rat', rat, i, phasem[i-1, i-1])
+                    # print(phasem)
+                    # print(phases[:4, :4]==0)
                     vec[j-1, i-1] /= rat
                 for j in range(i-1, 0, -1):
                     rat = phasem[i-1, j-1]
@@ -344,6 +400,14 @@ def phase_updated(A_in, offsets, npos):
 
             # LINE 467 - The vec array now holds the inverse of the original phasem array.
 
+            print('END MATRIX INVERSION', vec.shape, phasem.shape)
+            print(vec[:4, :4])
+            print(phasem[:4, :4])
+            print(phases[:4, :4])
+            # print(vec[:4, :4]@phasem[:4, :4])
+            print(vec[:4, :4]@phasem[:4, :4])
+            print()
+
             ### END MATRIX INVERSION
 
             # LINE 469 - If any pivoting has been done, undo it.
@@ -351,6 +415,7 @@ def phase_updated(A_in, offsets, npos):
             for i in range(1, NSUB**2+1):
                 if key[i-1]!=i: 
                     k = i+1
+                    # print(key)
                     while (key[k-1]!=i) and (k<NSUB**2): 
                         k += 1
                     for kk in range(1, NSUB**2+1):
@@ -359,92 +424,116 @@ def phase_updated(A_in, offsets, npos):
                         vec[kk-1, k-1] = temp
                     key[k-1] = key[i-1]
 
-            # LINE 490 - For NSUB2 images, we are done
+            # # LINE 490 - For NSUB2 images, we are done
             
             if npp==NSUB**2:
+                # print('npp==NSUB**2')
+                # print('coef', coef)
+                # print('vec', vec[:, 0], npos-1)
                 coef[isec-1] = vec[npos-1, 0]
 
             # LINE 495 - Otherwise, we need to do a little more work.  Here we just solve for the fundamental image.
             
             else: 
+                # print('npp!=NSUB**2')
                 coef[isec-1] = 0
                 for i in range(1, NSUB**2+1):
                     coef[isec-1] += vec[i-1, 0]*np.conj(phases[i-1, npos-1])
+            # print(isec, npos, coef[isec], coef)
 
             # LINE 505 - Addin weighting factor
 
             coef[isec-1] *= wt[npos-1]
 
-            print(f'Image {npos}, power {coef[isec-1]}, sector {isec}')
+            # print(f'Image {npos}, power {coef[isec-1]*np.conj(coef[isec-1])}, sector {isec}')
+            # print(f'Image {npos}, power {coef[isec-1]}, sector {isec}')
+        #     break
+        # break
+
+    # print('coef', coef)
+    # COEFS.append(coef)
 
     # LINE 516 - apply the complex scale factor to the transform
-    # plt.imshow(dutils.norm(A))
+
     isec = 0
-    isv = NR_FREQ//2
-    iev = isv - NR_FREQ//NSUB + 1 
-
-    for iy in range(isy, isy+nsy): # 2 times
-        ieu = NC_FREQ - (NSUB - 1)*(nsx - 1)*NC_FREQ//NSUB
+    isv = nrow//2
+    iev = isv - nrow//NSUB + 1 
+    # print(A)
+    # print('phix', phix)
+    # print('phiy', phiy)
+    # print(isv, iev)
+    # print(nsy)
+    # print(nsx)
+    # print(isv-(iev-1))
+    for iy in range(isy, isy+nsy):
+        ieu = ncol - (NSUB - 1)*(nsx - 1)*ncol//NSUB
+        # print(ieu) # TODO: verify that ieu==ncol if nsx = 1
         isu = 1
-        for ix in range(0, nsx): # 1 times
+        for ix in range(0, nsx):
             isec += 1
-            coefficient = coef[isec-1]
-            ROW = np.arange(iev-1, isv)
-            V = ROW/NR_FREQ
-            if isv<=0: 
-                ROW += NR_FREQ
-            print(iev-1, isv)
-            rphase = -2*phiy[npos-1]*V
-            COL = np.arange(isu-1, ieu, 2)
-            U = COL/(NC_FREQ - 2)/2
-            cphase = -2*phix[npos-1]*U
-            fr = A[COL, ROW[0]:ROW[-1]+1]
-            fi = A[COL+1, ROW[0]:ROW[-1]+1]
-            f = fr + fi*1j
-            RPHASE, CPHASE = np.meshgrid(rphase, cphase)
-            factor = coefficient*np.exp(1j*(RPHASE + CPHASE))
-            f_updated = f*factor
-            A[COL, ROW[0]:ROW[-1]+1] = f_updated.real
-            A[COL+1, ROW[0]:ROW[-1]+1] = f_updated.imag
+            # print(isec, coef[isec-1])
+            spr = coef[isec-1].real # NOTE Fortran casts Complex to Real directly
+            spi = coef[isec-1].imag
+            # print('this coef', coef[isec-1])
+            # COEFS.append(coef[isec-1])
+            for vrow in range(isv, iev-1, -1): 
+                # print('vrow', vrow, 'isv', isv, 'iev', iev)
+                if vrow>0:
+                    row = vrow
+                else: 
+                    row = nrow + vrow
+                if row>nrow//2: 
+                    V = (row - nrow - 1)/nrow
+                else: 
+                    V = (row - 1)/nrow
+                rphase = -2*phiy[npos-1]*V
+                # rphase = rphase/2-1
+                # print(rphase)
+                rpr = np.cos(rphase)
+                rpi = np.sin(rphase)
+                ypr = rpr*spr - rpi*spi
+                ypi = rpi*spr + rpr*spi
+                # print(rphase, rpr, rpi, spr, spi, ypr, ypi, rpr*spr)
+                # print((ieu+1-isu)//2)
+                for col in range(isu, ieu+1, 2):
+                    # print(row, isv, iev, col, isu, ieu)
+                    U = (col - 1)/(ncol - 2)/2
+                    cphase = -2*phix[npos-1]*U
+                    # print(U, V)
+                    # print(rphase, cphase, phiy[npos-1], phiy[npos-1])
+                    # print(' ', cphase)
+                    # print(rphase, cphase)
+                    cpr = np.cos(cphase)
+                    cpi = np.sin(cphase)
+                    tpr = ypr*cpr - ypi*cpi
+                    tpi = ypi*cpr + ypr*cpi
+                    # print(vrow, row, col, isu, ieu+2)
+                    fr = A[col-1, row-1]
+                    fi = A[col+1-1, row-1]
+                    # print('ypr', ypr, cpr, ypr*cpr, ypi, cpi, ypr*cpr - ypi*cpi, tpr,tpi)
+                    # print()
+                    A[col-1, row-1] = fr*tpr - fi*tpi
+                    A[col+1-1, row-1] = fi*tpr + fr*tpi
             isu = ieu + 1
-            ieu = NC_FREQ - (nsx - 2 - ix)*NC_FREQ//NSUB 
+            ieu = ncol - (nsx - 2 - ix)*ncol//NSUB # TODO: check values
         isv = iev - 1
-        iev = isv - NR_FREQ//NSUB + 1
+        iev = isv - nrow//NSUB + 1 # TODO: check values
         if iy==(isy + nsy - 2): 
-            iev = -(NR_FREQ//2) + 1
+            iev = -(nrow//2) + 1 # NOTE: add a bracket to change negative sign to minus sign
 
+    # print(vec)
+    # print(phasem)
+    # plt.imshow(vec.real)
+    # plt.colorbar()
+    # plt.show()
+    # plt.imshow(phasem.real)
+    # plt.colorbar()
+    # plt.show()
+    # plt.imshow((vec@phasem).real)
+    # plt.colorbar()
+    # plt.show()
     return A
 
-def phase_shift(A, offsets, n, verbose=False):
-    """
-    Apply phase shifts to the input data.
 
-    Parameters
-    ----------
-    A : ndarray
-        Input 2D array representing Fourier-transformed data.
-    offsets : list of lists
-        Array of offsets and weights, with shape (n, 3), where the columns are
-        x-offset, y-offset, and weight.
-    n : int
-        Index of the position for which the coefficients are computed.
-    verbose : bool, optional
-        Whether to suppress internal print statements. Default is False.
 
-    Returns
-    -------
-    ndarray
-        Modified 2D array after phase adjustment.
-    """
-    if not verbose: 
-        stdout_backup = sys.stdout
-        sys.stdout = open(os.devnull, 'w')
-        try: 
-            Aphased = phase_updated(A, offsets, n)
-        except Exception as e: 
-            print(repr(e))
-        finally:
-            sys.stdout = stdout_backup
-    else: 
-        Aphased = phase_updated(A, offsets, n)
-    return Aphased
+
