@@ -417,35 +417,36 @@ def legacy_ifft2(A):
     data_return[:N512] = data_rec.real
     return data_return
 
-NSUB = 2
+def combine_image(normalized_atlas, centroids, wt, oversample=2):
 
-def combine_image(normalized_atlas, centroids, wt):
-    Atotal = np.zeros((N257, N512), dtype=np.complex128)
+    # SOME GLOBAL FACTORS
+
+    NSUB = oversample
+    NPP = len(normalized_atlas)
+    NX, NY = normalized_atlas[0].shape
+    NX_LARGE = NX*NSUB
+    NY_LARGE = NY*NSUB
+    N =int(np.ceil(np.log2(np.max([NX_LARGE, NY_LARGE]))))
+    NC_FREQ = 2**N + 2
+    NR_FREQ = 2**N
+
+    Atotal = np.zeros((NC_FREQ//2, NR_FREQ), dtype=np.complex128)
 
     for npos in range(len(normalized_atlas)): 
-        data = normalized_atlas[npos]
-        nx, ny = data.shape
-        data_large = np.zeros((N512, N512))
-        data_large[:nx*NSUB:NSUB, :ny*NSUB:NSUB] = data
 
         # BEGIN PHASE
 
-        npp = len(normalized_atlas)
-        phix = np.zeros(npp)
-        # spr, spi, rpr, rpi, cpr, cpi, ypr, ypi, tpr, tpi = 0
-        # fr, fi = 0
-        phasem = np.zeros((NSUB**2, NSUB**2), dtype=np.complex128)
-        vec = np.zeros((NSUB**2, NSUB**2), dtype=np.complex128)
+        data = normalized_atlas[npos]
+        data_large = np.zeros((NR_FREQ, NR_FREQ))
+        data_large[:NX*NSUB:NSUB, :NY*NSUB:NSUB] = data
         coef = np.zeros((NSUB**2), dtype=np.complex128)
-        phases = np.zeros((NSUB**2, npp), dtype=np.complex128)
-        # row, col, vrow = 0
         
         # LINE 247 - read offsets (totally different from the original code)
 
         dx = centroids[:, 1]
         dy = centroids[:, 0]
-        phix = NSUB*PI*dx
-        phiy = NSUB*PI*dy
+        phix = NSUB*np.pi*dx
+        phiy = NSUB*np.pi*dy
 
         # LINE 289 - Calculate the coefficients for each image. 
 
@@ -460,11 +461,8 @@ def combine_image(normalized_atlas, centroids, wt):
         for iy in range(isy, isy+nsy): 
             for ix in range(0, nsx): 
 
-                isec += 1
-
                 # LINE 304
 
-                    
                 # Precompute normalized phase shifts
                 px = -2 * phix / NSUB
                 py = -2 * phiy / NSUB
@@ -492,56 +490,42 @@ def combine_image(normalized_atlas, centroids, wt):
 
                 # LINE 355 - This loads an identity matrix, which will be used to invert the phase matrix.
 
-
                 # LINE 371 - The weighting factor is used at this point.
 
-                if npp>NSUB**2: 
+                if NPP>NSUB**2: 
                     phasem = phases @ np.diag(wt) @ np.conj(phases).T
                 else: 
                     phasem = phases
-                    
+
                 vec = np.linalg.inv(phasem)
 
-                # # LINE 490 - For NSUB2 images, we are done
-                
-                if npp==NSUB**2:
-                    # print('npp==NSUB**2')
-                    # print('coef', coef)
-                    # print('vec', vec[:, 0], npos-1)
-                    coef[isec-1] = vec[npos, 0]
+                # LINE 490 - For NSUB2 images, we are done
 
-                # LINE 495 - Otherwise, we need to do a little more work.  Here we just solve for the fundamental image.
-                
+                if NPP==NSUB**2:
+                    coef[isec] = vec[npos, 0]
+
+                # LINE 495 - Otherwise, we need to do a little more work. Here we just solve for the fundamental image.
+
                 else: 
-                    # print('npp!=NSUB**2')
-                    coef[isec-1] = 0
-                    for i in range(1, NSUB**2+1):
-                        coef[isec-1] += vec[i-1, 0]*np.conj(phases[i-1, npos])
-                # print(isec, npos, coef[isec], coef)
+                    coef[isec] = 0
+                    for i in range(NSUB**2):
+                        coef[isec] += vec[i, 0]*np.conj(phases[i, npos])
 
                 # LINE 505 - Addin weighting factor
 
-                coef[isec-1] *= wt[npos]
+                coef[isec] *= wt[npos]
 
-                # print(f'Image {npos}, power {coef[isec-1]*np.conj(coef[isec-1])}, sector {isec}')
-                # print(f'Image {npos}, power {coef[isec-1]}, sector {isec}')
-            #     break
-            # break
+                # print(f'Image {npos}, power {coef[isec]*np.conj(coef[isec])}, sector {isec}')
+                # print(f'Image {npos}, power {coef[isec]}, sector {isec}')
 
-        # print('coef', coef)
-        # COEFS.append(coef)
+                isec += 1
 
         # LINE 516 - apply the complex scale factor to the transform
         
         # BEGIN FFT2
 
-        fft_input = data_large[:N512, :]
-        # Compute the full 2D FFT; shape is (N512, N512)
-        A_complex = scipy.fft.fft2(fft_input)
-        # For a real signal of length N512, the unique FFT coefficients are indices 0 to N256 (inclusive)
-        # This gives us N257 rows of unique data.
-        A_unique = A_complex[:N257, :]  # shape (N257, N512)
-        # Pack the FFT output into a half-complex real array of shape (N514, N512)
+        A_hat = scipy.fft.fft2(data_large) # data_large must be (2^N, 2^N) for now
+        A_unique = A_hat[:NC_FREQ//2, :]  # shape (NC_FREQ//2, NR_FREQ)
         A_complex = np.conj(A_unique)
 
         # END FFT2
@@ -580,6 +564,7 @@ def combine_image(normalized_atlas, centroids, wt):
 
                 # Apply the phase shift to A
                 A_complex[np.ix_(cols // 2, rows - 1)] *= phase_shift
+                # print('rows', (cols // 2)[[0, -1]], 'cols', (rows - 1)[[0, -1]])
                 
                 isu = ieu + 1
                 ieu = NC_FREQ - (nsx - 2 - ix)*NC_FREQ//NSUB # TODO: check values
@@ -589,7 +574,6 @@ def combine_image(normalized_atlas, centroids, wt):
             if iy==(isy + nsy - 2): 
                 iev = -(NR_FREQ//2) + 1 # NOTE: add a bracket to change negative sign to minus sign
 
-
         Atotal += np.conj(A_complex)
         
         print('---')
@@ -598,17 +582,15 @@ def combine_image(normalized_atlas, centroids, wt):
 
     # BEGIN IFFT2
 
-    F = np.zeros((N512, N512), dtype=np.complex128)
-    F[:N257, :] = Atotal
-    F[N257:, 0] = np.conj(Atotal[1:N256])[::-1, 0]
-    F[N257:, 1:] = np.conj(Atotal[1:N256])[::-1, :0:-1]
+    F = np.zeros((NR_FREQ, NR_FREQ), dtype=np.complex128)
+    F[:NC_FREQ//2, :] = Atotal
+    F[NC_FREQ//2:, 0] = np.conj(Atotal[1:NR_FREQ//2])[::-1, 0]
+    F[NC_FREQ//2:, 1:] = np.conj(Atotal[1:NR_FREQ//2])[::-1, :0:-1]
     data_rec = scipy.fft.ifft2(F)
+    data_real = data_rec.real
 
     # END IFFT2
-    
-    nx, ny = normalized_atlas[0].shape
-    nx_large = nx*NSUB
-    ny_large = ny*NSUB
-    combined_image = data_rec.real[:nx_large, :ny_large]
+
+    combined_image = data_real[:NX_LARGE, :NY_LARGE]
 
     return combined_image
