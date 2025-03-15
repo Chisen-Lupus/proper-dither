@@ -417,47 +417,35 @@ def legacy_ifft2(A):
     data_return[:N512] = data_rec.real
     return data_return
 
+NSUB = 2
 
 def combine_image(normalized_atlas, centroids, wt):
-
-    # [y, x, wt]
-    offsets = np.hstack((centroids[:, ::-1], wt[:, np.newaxis]))
-    # print(offsets)
-    # Atotal = np.zeros((NC_FREQ, NR_FREQ))
     Atotal = np.zeros((N257, N512), dtype=np.complex128)
-    for i in range(len(normalized_atlas)): 
-        data = normalized_atlas[i]
+
+    for npos in range(len(normalized_atlas)): 
+        data = normalized_atlas[npos]
         nx, ny = data.shape
-        data_large = np.zeros((NC_FREQ, NR_FREQ))
+        data_large = np.zeros((N512, N512))
         data_large[:nx*NSUB:NSUB, :ny*NSUB:NSUB] = data
-
-
 
         # BEGIN PHASE
 
-        npos = i + 1
-        NST = len(offsets)
-        phix = np.zeros(NST)
+        npp = len(normalized_atlas)
+        phix = np.zeros(npp)
         # spr, spi, rpr, rpi, cpr, cpi, ypr, ypi, tpr, tpi = 0
         # fr, fi = 0
-        phasem = np.zeros((NDIV**2, NDIV**2), dtype=np.complex128)
-        vec = np.zeros((NDIV**2, NDIV**2), dtype=np.complex128)
-        coef = np.zeros((NDIV**2), dtype=np.complex128)
-        phases = np.zeros((NDIV**2, NST), dtype=np.complex128)
+        phasem = np.zeros((NSUB**2, NSUB**2), dtype=np.complex128)
+        vec = np.zeros((NSUB**2, NSUB**2), dtype=np.complex128)
+        coef = np.zeros((NSUB**2), dtype=np.complex128)
+        phases = np.zeros((NSUB**2, npp), dtype=np.complex128)
         # row, col, vrow = 0
-        key = np.zeros(NDIV**2)
         
         # LINE 247 - read offsets (totally different from the original code)
 
-        offsets = np.array(offsets)
-        xcr = offsets[0, 0]
-        ycr = offsets[0, 1]
-        dx = offsets[:, 0] - xcr
-        dy = offsets[:, 1] - ycr
+        dx = centroids[:, 1]
+        dy = centroids[:, 0]
         phix = NSUB*PI*dx
         phiy = NSUB*PI*dy
-        wt = offsets[:, 2]
-        npp = len(offsets)
 
         # LINE 289 - Calculate the coefficients for each image. 
 
@@ -520,7 +508,7 @@ def combine_image(normalized_atlas, centroids, wt):
                     # print('npp==NSUB**2')
                     # print('coef', coef)
                     # print('vec', vec[:, 0], npos-1)
-                    coef[isec-1] = vec[npos-1, 0]
+                    coef[isec-1] = vec[npos, 0]
 
                 # LINE 495 - Otherwise, we need to do a little more work.  Here we just solve for the fundamental image.
                 
@@ -528,12 +516,12 @@ def combine_image(normalized_atlas, centroids, wt):
                     # print('npp!=NSUB**2')
                     coef[isec-1] = 0
                     for i in range(1, NSUB**2+1):
-                        coef[isec-1] += vec[i-1, 0]*np.conj(phases[i-1, npos-1])
+                        coef[isec-1] += vec[i-1, 0]*np.conj(phases[i-1, npos])
                 # print(isec, npos, coef[isec], coef)
 
                 # LINE 505 - Addin weighting factor
 
-                coef[isec-1] *= wt[npos-1]
+                coef[isec-1] *= wt[npos]
 
                 # print(f'Image {npos}, power {coef[isec-1]*np.conj(coef[isec-1])}, sector {isec}')
                 # print(f'Image {npos}, power {coef[isec-1]}, sector {isec}')
@@ -578,14 +566,14 @@ def combine_image(normalized_atlas, centroids, wt):
                 V = np.where(rows > NR_FREQ // 2, (rows - NR_FREQ - 1) / NR_FREQ, (rows - 1) / NR_FREQ)
 
                 # Compute the row phase shift (as a complex exponential)
-                rphase = np.exp(-2j * phiy[npos-1] * V)
+                rphase = np.exp(-2j * phiy[npos] * V)
 
                 # Compute the normalized column positions (U)
                 cols = np.arange(isu, ieu + 1, 2)
                 U = (cols - 1) / (NC_FREQ - 2) / 2
 
                 # Compute the column phase shift (as a complex exponential)
-                cphase = np.exp(-2j * phix[npos-1] * U)
+                cphase = np.exp(-2j * phix[npos] * U)
 
                 # Compute the overall phase shift (outer product for broadcasting)
                 phase_shift = coef_complex * np.outer(cphase, rphase)
