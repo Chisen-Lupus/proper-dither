@@ -107,6 +107,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span><span class="o">,</span><span class="w"> </span><span class="nn">sys</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">scipy</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">copy</span>
 
 <span class="c1"># NOTE: If you need some fourier transform in old days...</span>
 
@@ -517,62 +518,37 @@
     <span class="k">return</span> <span class="n">data_return</span></div>
 
 
+<span class="n">NSUB</span> <span class="o">=</span> <span class="mi">2</span>
 
 <div class="viewcode-block" id="combine_image">
 <a class="viewcode-back" href="../../dither_updated.html#dither.updated.combine_image">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">combine_image</span><span class="p">(</span><span class="n">normalized_atlas</span><span class="p">,</span> <span class="n">centroids</span><span class="p">,</span> <span class="n">wt</span><span class="p">):</span>
+    <span class="n">Atotal</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">N257</span><span class="p">,</span> <span class="n">N512</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">complex128</span><span class="p">)</span>
 
-    <span class="c1"># [y, x, wt]</span>
-    <span class="n">offsets</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">centroids</span><span class="p">[:,</span> <span class="p">::</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">wt</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]))</span>
-    <span class="c1"># print(offsets)</span>
-    <span class="n">Atotal</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">NC_FREQ</span><span class="p">,</span> <span class="n">NR_FREQ</span><span class="p">))</span>
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">normalized_atlas</span><span class="p">)):</span> 
-        <span class="n">data</span> <span class="o">=</span> <span class="n">normalized_atlas</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">npos</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">normalized_atlas</span><span class="p">)):</span> 
+        <span class="n">data</span> <span class="o">=</span> <span class="n">normalized_atlas</span><span class="p">[</span><span class="n">npos</span><span class="p">]</span>
         <span class="n">nx</span><span class="p">,</span> <span class="n">ny</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span>
-        <span class="n">data_large</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">NC_FREQ</span><span class="p">,</span> <span class="n">NR_FREQ</span><span class="p">))</span>
+        <span class="n">data_large</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">N512</span><span class="p">,</span> <span class="n">N512</span><span class="p">))</span>
         <span class="n">data_large</span><span class="p">[:</span><span class="n">nx</span><span class="o">*</span><span class="n">NSUB</span><span class="p">:</span><span class="n">NSUB</span><span class="p">,</span> <span class="p">:</span><span class="n">ny</span><span class="o">*</span><span class="n">NSUB</span><span class="p">:</span><span class="n">NSUB</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span>
-
-
-        <span class="c1"># BEGIN FFT2</span>
-
-        <span class="n">fft_input</span> <span class="o">=</span> <span class="n">data_large</span><span class="p">[:</span><span class="n">N512</span><span class="p">,</span> <span class="p">:]</span>
-        <span class="c1"># Compute the full 2D FFT; shape is (N512, N512)</span>
-        <span class="n">A_complex</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fft2</span><span class="p">(</span><span class="n">fft_input</span><span class="p">)</span>
-        <span class="c1"># For a real signal of length N512, the unique FFT coefficients are indices 0 to N256 (inclusive)</span>
-        <span class="c1"># This gives us N257 rows of unique data.</span>
-        <span class="n">A_unique</span> <span class="o">=</span> <span class="n">A_complex</span><span class="p">[:</span><span class="n">N257</span><span class="p">,</span> <span class="p">:]</span>  <span class="c1"># shape (N257, N512)</span>
-        <span class="c1"># Pack the FFT output into a half-complex real array of shape (N514, N512)</span>
-        <span class="n">A</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">N514</span><span class="p">,</span> <span class="n">N512</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">data_large</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
-        <span class="n">A</span><span class="p">[</span><span class="mi">0</span><span class="p">::</span><span class="mi">2</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">A_unique</span><span class="o">.</span><span class="n">real</span>    <span class="c1"># even-indexed rows</span>
-        <span class="n">A</span><span class="p">[</span><span class="mi">1</span><span class="p">::</span><span class="mi">2</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="o">-</span><span class="n">A_unique</span><span class="o">.</span><span class="n">imag</span>   <span class="c1"># odd-indexed rows</span>
-
-        <span class="c1"># END FFT2</span>
 
         <span class="c1"># BEGIN PHASE</span>
 
-        <span class="n">npos</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span>
-        <span class="n">NST</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">offsets</span><span class="p">)</span>
-        <span class="n">phix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">NST</span><span class="p">)</span>
+        <span class="n">npp</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">normalized_atlas</span><span class="p">)</span>
+        <span class="n">phix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">npp</span><span class="p">)</span>
         <span class="c1"># spr, spi, rpr, rpi, cpr, cpi, ypr, ypi, tpr, tpi = 0</span>
         <span class="c1"># fr, fi = 0</span>
-        <span class="n">phasem</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">NDIV</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">NDIV</span><span class="o">**</span><span class="mi">2</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">complex128</span><span class="p">)</span>
-        <span class="n">vec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">NDIV</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">NDIV</span><span class="o">**</span><span class="mi">2</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">complex128</span><span class="p">)</span>
-        <span class="n">coef</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">NDIV</span><span class="o">**</span><span class="mi">2</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">complex128</span><span class="p">)</span>
-        <span class="n">phases</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">NDIV</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">NST</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">complex128</span><span class="p">)</span>
+        <span class="n">phasem</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">NSUB</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">NSUB</span><span class="o">**</span><span class="mi">2</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">complex128</span><span class="p">)</span>
+        <span class="n">vec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">NSUB</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">NSUB</span><span class="o">**</span><span class="mi">2</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">complex128</span><span class="p">)</span>
+        <span class="n">coef</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">NSUB</span><span class="o">**</span><span class="mi">2</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">complex128</span><span class="p">)</span>
+        <span class="n">phases</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">NSUB</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">npp</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">complex128</span><span class="p">)</span>
         <span class="c1"># row, col, vrow = 0</span>
-        <span class="n">key</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">NDIV</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
         
         <span class="c1"># LINE 247 - read offsets (totally different from the original code)</span>
 
-        <span class="n">offsets</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">offsets</span><span class="p">)</span>
-        <span class="n">xcr</span> <span class="o">=</span> <span class="n">offsets</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
-        <span class="n">ycr</span> <span class="o">=</span> <span class="n">offsets</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
-        <span class="n">dx</span> <span class="o">=</span> <span class="n">offsets</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">xcr</span>
-        <span class="n">dy</span> <span class="o">=</span> <span class="n">offsets</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">ycr</span>
+        <span class="n">dx</span> <span class="o">=</span> <span class="n">centroids</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="n">dy</span> <span class="o">=</span> <span class="n">centroids</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
         <span class="n">phix</span> <span class="o">=</span> <span class="n">NSUB</span><span class="o">*</span><span class="n">PI</span><span class="o">*</span><span class="n">dx</span>
         <span class="n">phiy</span> <span class="o">=</span> <span class="n">NSUB</span><span class="o">*</span><span class="n">PI</span><span class="o">*</span><span class="n">dy</span>
-        <span class="n">wt</span> <span class="o">=</span> <span class="n">offsets</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span>
-        <span class="n">npp</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">offsets</span><span class="p">)</span>
 
         <span class="c1"># LINE 289 - Calculate the coefficients for each image. </span>
 
@@ -635,7 +611,7 @@
                     <span class="c1"># print(&#39;npp==NSUB**2&#39;)</span>
                     <span class="c1"># print(&#39;coef&#39;, coef)</span>
                     <span class="c1"># print(&#39;vec&#39;, vec[:, 0], npos-1)</span>
-                    <span class="n">coef</span><span class="p">[</span><span class="n">isec</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">vec</span><span class="p">[</span><span class="n">npos</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+                    <span class="n">coef</span><span class="p">[</span><span class="n">isec</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">vec</span><span class="p">[</span><span class="n">npos</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
 
                 <span class="c1"># LINE 495 - Otherwise, we need to do a little more work.  Here we just solve for the fundamental image.</span>
                 
@@ -643,12 +619,12 @@
                     <span class="c1"># print(&#39;npp!=NSUB**2&#39;)</span>
                     <span class="n">coef</span><span class="p">[</span><span class="n">isec</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
                     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">NSUB</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
-                        <span class="n">coef</span><span class="p">[</span><span class="n">isec</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="n">vec</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">conj</span><span class="p">(</span><span class="n">phases</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">npos</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+                        <span class="n">coef</span><span class="p">[</span><span class="n">isec</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="n">vec</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">conj</span><span class="p">(</span><span class="n">phases</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">npos</span><span class="p">])</span>
                 <span class="c1"># print(isec, npos, coef[isec], coef)</span>
 
                 <span class="c1"># LINE 505 - Addin weighting factor</span>
 
-                <span class="n">coef</span><span class="p">[</span><span class="n">isec</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*=</span> <span class="n">wt</span><span class="p">[</span><span class="n">npos</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">coef</span><span class="p">[</span><span class="n">isec</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*=</span> <span class="n">wt</span><span class="p">[</span><span class="n">npos</span><span class="p">]</span>
 
                 <span class="c1"># print(f&#39;Image {npos}, power {coef[isec-1]*np.conj(coef[isec-1])}, sector {isec}&#39;)</span>
                 <span class="c1"># print(f&#39;Image {npos}, power {coef[isec-1]}, sector {isec}&#39;)</span>
@@ -659,96 +635,85 @@
         <span class="c1"># COEFS.append(coef)</span>
 
         <span class="c1"># LINE 516 - apply the complex scale factor to the transform</span>
+        
+        <span class="c1"># BEGIN FFT2</span>
+
+        <span class="n">fft_input</span> <span class="o">=</span> <span class="n">data_large</span><span class="p">[:</span><span class="n">N512</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="c1"># Compute the full 2D FFT; shape is (N512, N512)</span>
+        <span class="n">A_complex</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fft2</span><span class="p">(</span><span class="n">fft_input</span><span class="p">)</span>
+        <span class="c1"># For a real signal of length N512, the unique FFT coefficients are indices 0 to N256 (inclusive)</span>
+        <span class="c1"># This gives us N257 rows of unique data.</span>
+        <span class="n">A_unique</span> <span class="o">=</span> <span class="n">A_complex</span><span class="p">[:</span><span class="n">N257</span><span class="p">,</span> <span class="p">:]</span>  <span class="c1"># shape (N257, N512)</span>
+        <span class="c1"># Pack the FFT output into a half-complex real array of shape (N514, N512)</span>
+        <span class="n">A_complex</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">conj</span><span class="p">(</span><span class="n">A_unique</span><span class="p">)</span>
+
+        <span class="c1"># END FFT2</span>
 
         <span class="n">isec</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="n">isv</span> <span class="o">=</span> <span class="n">NR_FREQ</span><span class="o">//</span><span class="mi">2</span>
         <span class="n">iev</span> <span class="o">=</span> <span class="n">isv</span> <span class="o">-</span> <span class="n">NR_FREQ</span><span class="o">//</span><span class="n">NSUB</span> <span class="o">+</span> <span class="mi">1</span> 
-        <span class="c1"># print(A)</span>
-        <span class="c1"># print(&#39;phix&#39;, phix)</span>
-        <span class="c1"># print(&#39;phiy&#39;, phiy)</span>
-        <span class="c1"># print(isv, iev)</span>
-        <span class="c1"># print(nsy)</span>
-        <span class="c1"># print(nsx)</span>
-        <span class="c1"># print(isv-(iev-1))</span>
         <span class="k">for</span> <span class="n">iy</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">isy</span><span class="p">,</span> <span class="n">isy</span><span class="o">+</span><span class="n">nsy</span><span class="p">):</span>
             <span class="n">ieu</span> <span class="o">=</span> <span class="n">NC_FREQ</span> <span class="o">-</span> <span class="p">(</span><span class="n">NSUB</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">nsx</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">NC_FREQ</span><span class="o">//</span><span class="n">NSUB</span>
             <span class="c1"># print(ieu) # TODO: verify that ieu==NC_FREQ if nsx = 1</span>
             <span class="n">isu</span> <span class="o">=</span> <span class="mi">1</span>
             <span class="k">for</span> <span class="n">ix</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">nsx</span><span class="p">):</span>
                 <span class="n">isec</span> <span class="o">+=</span> <span class="mi">1</span>
-                <span class="n">A_complex</span> <span class="o">=</span> <span class="n">A</span><span class="p">[::</span><span class="mi">2</span><span class="p">,</span> <span class="p">:]</span> <span class="o">+</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">A</span><span class="p">[</span><span class="mi">1</span><span class="p">::</span><span class="mi">2</span><span class="p">,</span> <span class="p">:]</span>
 
                 <span class="c1"># Extract the complex coefficient</span>
                 <span class="n">coef_complex</span> <span class="o">=</span> <span class="n">coef</span><span class="p">[</span><span class="n">isec</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
 
                 <span class="c1"># Compute the normalized row positions (V)</span>
+                <span class="c1"># print(isv, iev-1)</span>
                 <span class="n">rows</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">isv</span><span class="p">,</span> <span class="n">iev</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
                 <span class="n">rows</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">rows</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">rows</span><span class="p">,</span> <span class="n">NR_FREQ</span> <span class="o">+</span> <span class="n">rows</span><span class="p">)</span>
                 <span class="n">V</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">rows</span> <span class="o">&gt;</span> <span class="n">NR_FREQ</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="p">(</span><span class="n">rows</span> <span class="o">-</span> <span class="n">NR_FREQ</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="n">NR_FREQ</span><span class="p">,</span> <span class="p">(</span><span class="n">rows</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="n">NR_FREQ</span><span class="p">)</span>
 
                 <span class="c1"># Compute the row phase shift (as a complex exponential)</span>
-                <span class="n">rphase</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="n">j</span> <span class="o">*</span> <span class="n">phiy</span><span class="p">[</span><span class="n">npos</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">V</span><span class="p">)</span>
+                <span class="n">rphase</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="n">j</span> <span class="o">*</span> <span class="n">phiy</span><span class="p">[</span><span class="n">npos</span><span class="p">]</span> <span class="o">*</span> <span class="n">V</span><span class="p">)</span>
 
                 <span class="c1"># Compute the normalized column positions (U)</span>
                 <span class="n">cols</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">isu</span><span class="p">,</span> <span class="n">ieu</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
                 <span class="n">U</span> <span class="o">=</span> <span class="p">(</span><span class="n">cols</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">NC_FREQ</span> <span class="o">-</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
 
                 <span class="c1"># Compute the column phase shift (as a complex exponential)</span>
-                <span class="n">cphase</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="n">j</span> <span class="o">*</span> <span class="n">phix</span><span class="p">[</span><span class="n">npos</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">U</span><span class="p">)</span>
+                <span class="n">cphase</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="n">j</span> <span class="o">*</span> <span class="n">phix</span><span class="p">[</span><span class="n">npos</span><span class="p">]</span> <span class="o">*</span> <span class="n">U</span><span class="p">)</span>
 
                 <span class="c1"># Compute the overall phase shift (outer product for broadcasting)</span>
                 <span class="n">phase_shift</span> <span class="o">=</span> <span class="n">coef_complex</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">outer</span><span class="p">(</span><span class="n">cphase</span><span class="p">,</span> <span class="n">rphase</span><span class="p">)</span>
 
                 <span class="c1"># Apply the phase shift to A</span>
                 <span class="n">A_complex</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ix_</span><span class="p">(</span><span class="n">cols</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="n">rows</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)]</span> <span class="o">*=</span> <span class="n">phase_shift</span>
-
-                <span class="c1"># If needed, convert back to separate real and imaginary parts</span>
-                <span class="n">A</span><span class="p">[::</span><span class="mi">2</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">A_complex</span><span class="o">.</span><span class="n">real</span>
-                <span class="n">A</span><span class="p">[</span><span class="mi">1</span><span class="p">::</span><span class="mi">2</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">A_complex</span><span class="o">.</span><span class="n">imag</span>
                 
                 <span class="n">isu</span> <span class="o">=</span> <span class="n">ieu</span> <span class="o">+</span> <span class="mi">1</span>
                 <span class="n">ieu</span> <span class="o">=</span> <span class="n">NC_FREQ</span> <span class="o">-</span> <span class="p">(</span><span class="n">nsx</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">-</span> <span class="n">ix</span><span class="p">)</span><span class="o">*</span><span class="n">NC_FREQ</span><span class="o">//</span><span class="n">NSUB</span> <span class="c1"># TODO: check values</span>
+                <span class="c1"># print(isu, ieu)</span>
             <span class="n">isv</span> <span class="o">=</span> <span class="n">iev</span> <span class="o">-</span> <span class="mi">1</span>
             <span class="n">iev</span> <span class="o">=</span> <span class="n">isv</span> <span class="o">-</span> <span class="n">NR_FREQ</span><span class="o">//</span><span class="n">NSUB</span> <span class="o">+</span> <span class="mi">1</span> <span class="c1"># TODO: check values</span>
             <span class="k">if</span> <span class="n">iy</span><span class="o">==</span><span class="p">(</span><span class="n">isy</span> <span class="o">+</span> <span class="n">nsy</span> <span class="o">-</span> <span class="mi">2</span><span class="p">):</span> 
                 <span class="n">iev</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="n">NR_FREQ</span><span class="o">//</span><span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span> <span class="c1"># NOTE: add a bracket to change negative sign to minus sign</span>
 
-        <span class="c1"># print(vec)</span>
-        <span class="c1"># print(phasem)</span>
-        <span class="c1"># plt.imshow(vec.real)</span>
-        <span class="c1"># plt.colorbar()</span>
-        <span class="c1"># plt.show()</span>
-        <span class="c1"># plt.imshow(phasem.real)</span>
-        <span class="c1"># plt.colorbar()</span>
-        <span class="c1"># plt.show()</span>
-        <span class="c1"># plt.imshow((vec@phasem).real)</span>
-        <span class="c1"># plt.colorbar()</span>
-        <span class="c1"># plt.show()</span>
-        <span class="n">Aphased</span> <span class="o">=</span> <span class="n">A</span>
 
-
-        <span class="n">Atotal</span> <span class="o">+=</span> <span class="n">Aphased</span>
-    <span class="c1"># print(Atotal)</span>
+        <span class="n">Atotal</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">conj</span><span class="p">(</span><span class="n">A_complex</span><span class="p">)</span>
+        
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;---&#39;</span><span class="p">)</span>
+    
     <span class="c1"># END PHASE</span>
 
     <span class="c1"># BEGIN IFFT2</span>
 
-    <span class="n">U</span> <span class="o">=</span> <span class="n">Atotal</span><span class="p">[</span><span class="mi">0</span><span class="p">::</span><span class="mi">2</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">Atotal</span><span class="p">[</span><span class="mi">1</span><span class="p">::</span><span class="mi">2</span><span class="p">,</span> <span class="p">:]</span>  <span class="c1"># U.shape = (257, 512)</span>
     <span class="n">F</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">N512</span><span class="p">,</span> <span class="n">N512</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">complex128</span><span class="p">)</span>
-    <span class="c1"># print(&#39;F\n&#39;, F)</span>
-    <span class="n">F</span><span class="p">[:</span><span class="n">N257</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">U</span>
-    <span class="n">F</span><span class="p">[</span><span class="n">N257</span><span class="p">:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">conj</span><span class="p">(</span><span class="n">U</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="n">N256</span><span class="p">])[::</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
-    <span class="n">F</span><span class="p">[</span><span class="n">N257</span><span class="p">:,</span> <span class="mi">1</span><span class="p">:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">conj</span><span class="p">(</span><span class="n">U</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="n">N256</span><span class="p">])[::</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">F</span><span class="p">[:</span><span class="n">N257</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">Atotal</span>
+    <span class="n">F</span><span class="p">[</span><span class="n">N257</span><span class="p">:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">conj</span><span class="p">(</span><span class="n">Atotal</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="n">N256</span><span class="p">])[::</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="n">F</span><span class="p">[</span><span class="n">N257</span><span class="p">:,</span> <span class="mi">1</span><span class="p">:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">conj</span><span class="p">(</span><span class="n">Atotal</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="n">N256</span><span class="p">])[::</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
     <span class="n">data_rec</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">ifft2</span><span class="p">(</span><span class="n">F</span><span class="p">)</span>
-    <span class="n">f</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">N514</span><span class="p">,</span> <span class="n">N512</span><span class="p">))</span>
-    <span class="n">f</span><span class="p">[:</span><span class="n">N512</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_rec</span><span class="o">.</span><span class="n">real</span>
 
     <span class="c1"># END IFFT2</span>
     
     <span class="n">nx</span><span class="p">,</span> <span class="n">ny</span> <span class="o">=</span> <span class="n">normalized_atlas</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span>
     <span class="n">nx_large</span> <span class="o">=</span> <span class="n">nx</span><span class="o">*</span><span class="n">NSUB</span>
     <span class="n">ny_large</span> <span class="o">=</span> <span class="n">ny</span><span class="o">*</span><span class="n">NSUB</span>
-    <span class="n">combined_image</span> <span class="o">=</span> <span class="n">f</span><span class="p">[:</span><span class="n">nx_large</span><span class="p">,</span> <span class="p">:</span><span class="n">ny_large</span><span class="p">]</span>
+    <span class="n">combined_image</span> <span class="o">=</span> <span class="n">data_rec</span><span class="o">.</span><span class="n">real</span><span class="p">[:</span><span class="n">nx_large</span><span class="p">,</span> <span class="p">:</span><span class="n">ny_large</span><span class="p">]</span>
+
     <span class="k">return</span> <span class="n">combined_image</span></div>
 
 </pre></div>
