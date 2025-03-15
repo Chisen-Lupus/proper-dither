@@ -32,6 +32,7 @@ Example Usage:
 
 import os, sys
 import numpy as np
+import scipy
 
 # NOTE: If you need some fourier transform in old days...
 
@@ -362,6 +363,92 @@ def phase(A_in, offsets, npos):
 
     return A
 
+N514 = NC_FREQ
+N512 = NR_FREQ
+N257 = N514//2
+N256 = N512//2
+
+
+np.set_printoptions(linewidth=200)
+
+def legacy_fft2(data_large):
+    """
+    data_large: real array of shape (N514, 512)
+    Only the first 512 rows (i.e. 2*nfft with nfft=N256) are used in the FFT.
+    The FFT output is then packed into a (N514, 512) array:
+    - Even-indexed rows hold the real parts of the unique frequencies.
+    - Odd-indexed rows hold the negative imaginary parts.
+    """
+    # Use only the first 512 rows for the FFT (2 * N256)
+    fft_input = data_large[:N512, :]
+    
+    # Compute the full 2D FFT; shape is (N512, N512)
+    A_complex = scipy.fft.fft2(fft_input)
+    # print('A_complex\n', A_complex)
+    
+    # For a real signal of length N512, the unique FFT coefficients are indices 0 to N256 (inclusive)
+    # This gives us N257 rows of unique data.
+    A_unique = A_complex[:N257, :]  # shape (N257, N512)
+    
+    # Pack the FFT output into a half-complex real array of shape (N514, N512)
+    A = np.zeros((N514, N512), dtype=data_large.dtype)
+    A[0::2, :] = A_unique.real    # even-indexed rows
+    A[1::2, :] = -A_unique.imag   # odd-indexed rows
+    
+    return A#, A_complex
+
+def legacy_ifft2(A):
+    """
+    Inverse of legacy_fft2.
+
+    Parameters
+    ----------
+    A : np.array, shape (N514, N512)
+        Half-complex FFT output as produced by legacy_fft2,
+        where even-indexed rows hold the real parts of the unique coefficients,
+        and odd-indexed rows hold the negative imaginary parts.
+
+    Returns
+    -------
+    data_reconstructed : np.array, shape (N512, N512)
+        The inverse FFT computed from the unique coefficients.
+    """
+    # print('A\n', A)
+    U = A[0::2, :] - 1j * A[1::2, :]  # U.shape = (257, 512)
+    # print('U\n', U)
+
+    # Reconstruct the full FFT array (shape 512×512).
+    # The unique coefficients U are for indices 0 to 256. For k=1,...,255, the
+    # full FFT satisfies F[512-k] = conj(F[k]). (Note: index 256 is the Nyquist.)
+    F = np.zeros((N512, N512), dtype=np.complex128)
+    # print('F\n', F)
+    F[:N257, :] = U
+    F[N257:, 0] = np.conj(U[1:N256])[::-1, 0]
+    F[N257:, 1:] = np.conj(U[1:N256])[::-1, :0:-1]
+
+
+    # print('F\n', F.shape)
+    # F = A[0::2] - 1j * A[1::2]
+
+    # For 1 <= k <= N//2 - 1, recover the negative frequencies.
+    # That is, for each k, set F[N-k, :] = conj( U[k, (-j mod M)] ).
+    # The column reordering is done by reversing U[k, :] and then rolling right by 1.
+    # print('F\n', F)
+    
+    # Compute the inverse 2D FFT.
+    # Note: scipy.fft.ifft2 scales by 1/(N512*N512), while our routines effectively use a factor of 1/(N512*N256).
+    # Multiplying by 2 adjusts for this normalization difference.
+    data_rec = scipy.fft.ifft2(F)
+    
+    # Transpose back to recover the original ordering.
+    # data_rec = data_rec.T
+    # print(data_rec.imag)
+    
+    # Place the reconstructed data into a (N514, N512) array.
+    data_return = np.zeros((N514, N512))
+    data_return[:N512] = data_rec.real
+    return data_return#, F
+
 
 def combine_image(normalized_atlas, centroids, wt):
 
@@ -378,39 +465,7 @@ def combine_image(normalized_atlas, centroids, wt):
 
         # BEGIN FFT2
 
-        data = data_large
-        nc, nr = data.shape
-        data_hat = data.copy()
-        for ir in range(nr):
-            a = data_hat[:, ir]
-            n = len(a)
-            nn = (len(a) - 2)//2
-            a_hat_complex = np.fft.fft(a[:nn*2])
-            a_hat_real = a_hat_complex.real
-            a_hat_imag = a_hat_complex.imag
-            a_hat = np.zeros(n)
-            a_hat[::2] = a_hat_real[:nn+1]
-            a_hat[1::2] = -a_hat_imag[:nn+1]
-            data_hat[:, ir] = a_hat
-        for ic in range(0, nc, 2):
-            row = np.zeros(nr*2)
-            row[0::2] = data_hat[ic, :]
-            row[1::2] = data_hat[ic+1, :]
-            
-            a = row
-            a_complex = a[::2]+a[1::2]*1j
-            a_hat_complex = np.fft.fft(a_complex)
-            a_hat_real = a_hat_complex.real
-            a_hat_imag = a_hat_complex.imag
-            a_hat = np.zeros(len(a))
-            a_hat[0] = a_hat_real[0]
-            a_hat[1] = a_hat_imag[0]
-            a_hat[2::2] = a_hat_real[-1:0:-1]
-            a_hat[3::2] = a_hat_imag[-1:0:-1]
-            row_hat = a_hat
-            data_hat[ic, :] = row_hat[0::2]
-            data_hat[ic+1, :] = row_hat[1::2]
-        A = data_hat
+        A = legacy_fft2(data_large)
 
         # END FFT2
 
@@ -594,52 +649,12 @@ def combine_image(normalized_atlas, centroids, wt):
 
 
         Atotal += Aphased
-
+    # print(Atotal)
     # END PHASE
 
     # BEGIN IFFT2
 
-    nc, nr = Atotal.shape
-    data_hat = Atotal
-    for ic in range(0, nc, 2):
-        row = np.zeros(nr*2)
-        row[0::2] = data_hat[ic, :]
-        row[1::2] = data_hat[ic+1, :]
-        a_hat = row
-        a_hat_real = np.zeros(len(a_hat)//2)
-        a_hat_imag = np.zeros(len(a_hat)//2)
-        a_hat_real[-1:0:-1] = a_hat[2::2]
-        a_hat_imag[-1:0:-1] = a_hat[3::2]
-        a_hat_real[0] = a_hat[0]
-        a_hat_imag[0] = a_hat[1]
-        a_hat_complex = a_hat_real + a_hat_imag*1j
-        a_complex = np.fft.ifft(a_hat_complex)
-        a = np.zeros(len(a_hat))
-        a[::2] = a_complex.real
-        a[1::2] = a_complex.imag
-        a *= len(a_hat)//2
-        row_hat = a
-        data_hat[ic, :] = row_hat[0::2]
-        data_hat[ic+1, :] = row_hat[1::2]
-    for ir in range(nr):
-        a_hat = data_hat[:, ir]
-        nn = (len(a_hat) - 2)//2
-        a_hat_real = np.zeros(nn*2)
-        a_hat_real[:nn+1] = a_hat[0::2]
-        a_hat_real[nn+1:] = a_hat[2:-2:2][::-1]
-        a_hat_imag = np.zeros(nn*2)
-        a_hat_imag[:nn+1] = -a_hat[1::2]
-        a_hat_imag[nn+1:] = a_hat[3:-1:2][::-1]
-        a_complex = a_hat_real + a_hat_imag*1j
-        a = np.fft.ifft(a_complex)
-        a = np.concatenate((a, [0]*2))
-        a = a.real
-        a *= nn
-        data_hat[:, ir] = a
-    data_hat /= nr*(nc - 2)//2
-    f = data_hat
-
-    # END IFFT2
+    f = legacy_ifft2(Atotal)
 
     
     nx, ny = normalized_atlas[0].shape
@@ -648,3 +663,4 @@ def combine_image(normalized_atlas, centroids, wt):
     combined_image = f[:nx_large, :ny_large]
     return combined_image
 
+np.fft.fft2
