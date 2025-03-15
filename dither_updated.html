@@ -53,10 +53,12 @@
 <li class="toctree-l3"><a class="reference internal" href="#key-features">Key Features:</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#dependencies">Dependencies:</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#example-usage">Example Usage:</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#dither.updated.combine_image"><code class="docutils literal notranslate"><span class="pre">combine_image()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#dither.updated.four1_backward"><code class="docutils literal notranslate"><span class="pre">four1_backward()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#dither.updated.four1_forward"><code class="docutils literal notranslate"><span class="pre">four1_forward()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#dither.updated.phase_shift"><code class="docutils literal notranslate"><span class="pre">phase_shift()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#dither.updated.phase_updated"><code class="docutils literal notranslate"><span class="pre">phase_updated()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#dither.updated.legacy_fft2"><code class="docutils literal notranslate"><span class="pre">legacy_fft2()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#dither.updated.legacy_ifft2"><code class="docutils literal notranslate"><span class="pre">legacy_ifft2()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#dither.updated.phase"><code class="docutils literal notranslate"><span class="pre">phase()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#dither.updated.real2dfft_backward"><code class="docutils literal notranslate"><span class="pre">real2dfft_backward()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#dither.updated.real2dfft_forward"><code class="docutils literal notranslate"><span class="pre">real2dfft_forward()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#dither.updated.realft_backward"><code class="docutils literal notranslate"><span class="pre">realft_backward()</span></code></a></li>
@@ -130,6 +132,11 @@ maintaining compatibility with the existing workflow.</p>
 </div>
 </section>
 <dl class="py function">
+<dt class="sig sig-object py" id="dither.updated.combine_image">
+<span class="sig-prename descclassname"><span class="pre">dither.updated.</span></span><span class="sig-name descname"><span class="pre">combine_image</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">normalized_atlas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">centroids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wt</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dither/updated.html#combine_image"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dither.updated.combine_image" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="dither.updated.four1_backward">
 <span class="sig-prename descclassname"><span class="pre">dither.updated.</span></span><span class="sig-name descname"><span class="pre">four1_backward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a_hat</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dither/updated.html#four1_backward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dither.updated.four1_backward" title="Link to this definition"></a></dt>
 <dd><p>Perform a 1D backward complex-to-complex FFT using NumPy.</p>
@@ -164,32 +171,54 @@ maintaining compatibility with the existing workflow.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="dither.updated.phase_shift">
-<span class="sig-prename descclassname"><span class="pre">dither.updated.</span></span><span class="sig-name descname"><span class="pre">phase_shift</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">A</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offsets</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dither/updated.html#phase_shift"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dither.updated.phase_shift" title="Link to this definition"></a></dt>
-<dd><p>Apply phase shifts to the input data.</p>
+<dt class="sig sig-object py" id="dither.updated.legacy_fft2">
+<span class="sig-prename descclassname"><span class="pre">dither.updated.</span></span><span class="sig-name descname"><span class="pre">legacy_fft2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_large</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dither/updated.html#legacy_fft2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dither.updated.legacy_fft2" title="Link to this definition"></a></dt>
+<dd><p>data_large: real array of shape (N514, 512)
+Only the first 512 rows (i.e. 2*nfft with nfft=N256) are used in the FFT.
+The FFT output is then packed into a (N514, 512) array:
+- Even-indexed rows hold the real parts of the unique frequencies.
+- Odd-indexed rows hold the negative imaginary parts.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="dither.updated.legacy_ifft2">
+<span class="sig-prename descclassname"><span class="pre">dither.updated.</span></span><span class="sig-name descname"><span class="pre">legacy_ifft2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">A</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dither/updated.html#legacy_ifft2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dither.updated.legacy_ifft2" title="Link to this definition"></a></dt>
+<dd><p>Inverse of legacy_fft2.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>A</strong> (<em>ndarray</em>) – Input 2D array representing Fourier-transformed data.</p></li>
-<li><p><strong>offsets</strong> (<em>list</em><em> of </em><em>lists</em>) – Array of offsets and weights, with shape (n, 3), where the columns are
-x-offset, y-offset, and weight.</p></li>
-<li><p><strong>n</strong> (<em>int</em>) – Index of the position for which the coefficients are computed.</p></li>
-<li><p><strong>verbose</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to suppress internal print statements. Default is False.</p></li>
-</ul>
+<dd class="field-odd"><p><strong>A</strong> (<em>np.array</em><em>, </em><em>shape</em><em> (</em><em>N514</em><em>, </em><em>N512</em><em>)</em>) – Half-complex FFT output as produced by legacy_fft2,
+where even-indexed rows hold the real parts of the unique coefficients,
+and odd-indexed rows hold the negative imaginary parts.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Modified 2D array after phase adjustment.</p>
+<dd class="field-even"><p><strong>data_reconstructed</strong> – The inverse FFT computed from the unique coefficients.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>ndarray</p>
+<dd class="field-odd"><p>np.array, shape (N512, N512)</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="dither.updated.phase_updated">
-<span class="sig-prename descclassname"><span class="pre">dither.updated.</span></span><span class="sig-name descname"><span class="pre">phase_updated</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">A_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offsets</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">npos</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dither/updated.html#phase_updated"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dither.updated.phase_updated" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="dither.updated.phase">
+<span class="sig-prename descclassname"><span class="pre">dither.updated.</span></span><span class="sig-name descname"><span class="pre">phase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">A_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offsets</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">npos</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dither/updated.html#phase"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dither.updated.phase" title="Link to this definition"></a></dt>
+<dd><p>Apply phase shifts and calculate coefficients for Fourier-based image transformations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>A_in</strong> (<em>ndarray</em>) – Input 2D array representing the Fourier-transformed data.</p></li>
+<li><p><strong>offsets</strong> (<em>ndarray</em>) – Array of offsets and weights, with shape (n, 3), where the columns are x-offset, y-offset, and weight.</p></li>
+<li><p><strong>npos</strong> (<em>int</em>) – Index of the position for which the coefficients are computed.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Modified 2D array after phase adjustment and transformation.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ndarraygit</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="dither.updated.real2dfft_backward">
