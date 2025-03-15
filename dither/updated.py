@@ -33,6 +33,7 @@ Example Usage:
 import os, sys
 import numpy as np
 import scipy
+import copy
 
 # NOTE: If you need some fourier transform in old days...
 
@@ -422,7 +423,8 @@ def combine_image(normalized_atlas, centroids, wt):
     # [y, x, wt]
     offsets = np.hstack((centroids[:, ::-1], wt[:, np.newaxis]))
     # print(offsets)
-    Atotal = np.zeros((NC_FREQ, NR_FREQ))
+    # Atotal = np.zeros((NC_FREQ, NR_FREQ))
+    Atotal = np.zeros((N257, N512), dtype=np.complex128)
     for i in range(len(normalized_atlas)): 
         data = normalized_atlas[i]
         nx, ny = data.shape
@@ -430,20 +432,6 @@ def combine_image(normalized_atlas, centroids, wt):
         data_large[:nx*NSUB:NSUB, :ny*NSUB:NSUB] = data
 
 
-        # BEGIN FFT2
-
-        fft_input = data_large[:N512, :]
-        # Compute the full 2D FFT; shape is (N512, N512)
-        A_complex = scipy.fft.fft2(fft_input)
-        # For a real signal of length N512, the unique FFT coefficients are indices 0 to N256 (inclusive)
-        # This gives us N257 rows of unique data.
-        A_unique = A_complex[:N257, :]  # shape (N257, N512)
-        # Pack the FFT output into a half-complex real array of shape (N514, N512)
-        A = np.zeros((N514, N512), dtype=data_large.dtype)
-        A[0::2, :] = A_unique.real    # even-indexed rows
-        A[1::2, :] = -A_unique.imag   # odd-indexed rows
-
-        # END FFT2
 
         # BEGIN PHASE
 
@@ -556,29 +544,35 @@ def combine_image(normalized_atlas, centroids, wt):
         # COEFS.append(coef)
 
         # LINE 516 - apply the complex scale factor to the transform
+        
+        # BEGIN FFT2
+
+        fft_input = data_large[:N512, :]
+        # Compute the full 2D FFT; shape is (N512, N512)
+        A_complex = scipy.fft.fft2(fft_input)
+        # For a real signal of length N512, the unique FFT coefficients are indices 0 to N256 (inclusive)
+        # This gives us N257 rows of unique data.
+        A_unique = A_complex[:N257, :]  # shape (N257, N512)
+        # Pack the FFT output into a half-complex real array of shape (N514, N512)
+        A_complex = np.conj(A_unique)
+
+        # END FFT2
 
         isec = 0
         isv = NR_FREQ//2
         iev = isv - NR_FREQ//NSUB + 1 
-        # print(A)
-        # print('phix', phix)
-        # print('phiy', phiy)
-        # print(isv, iev)
-        # print(nsy)
-        # print(nsx)
-        # print(isv-(iev-1))
         for iy in range(isy, isy+nsy):
             ieu = NC_FREQ - (NSUB - 1)*(nsx - 1)*NC_FREQ//NSUB
             # print(ieu) # TODO: verify that ieu==NC_FREQ if nsx = 1
             isu = 1
             for ix in range(0, nsx):
                 isec += 1
-                A_complex = A[::2, :] + 1j * A[1::2, :]
 
                 # Extract the complex coefficient
                 coef_complex = coef[isec-1]
 
                 # Compute the normalized row positions (V)
+                # print(isv, iev-1)
                 rows = np.arange(isv, iev-1, -1)
                 rows = np.where(rows > 0, rows, NR_FREQ + rows)
                 V = np.where(rows > NR_FREQ // 2, (rows - NR_FREQ - 1) / NR_FREQ, (rows - 1) / NR_FREQ)
@@ -598,52 +592,35 @@ def combine_image(normalized_atlas, centroids, wt):
 
                 # Apply the phase shift to A
                 A_complex[np.ix_(cols // 2, rows - 1)] *= phase_shift
-
-                # If needed, convert back to separate real and imaginary parts
-                A[::2, :] = A_complex.real
-                A[1::2, :] = A_complex.imag
                 
                 isu = ieu + 1
                 ieu = NC_FREQ - (nsx - 2 - ix)*NC_FREQ//NSUB # TODO: check values
+                # print(isu, ieu)
             isv = iev - 1
             iev = isv - NR_FREQ//NSUB + 1 # TODO: check values
             if iy==(isy + nsy - 2): 
                 iev = -(NR_FREQ//2) + 1 # NOTE: add a bracket to change negative sign to minus sign
 
-        # print(vec)
-        # print(phasem)
-        # plt.imshow(vec.real)
-        # plt.colorbar()
-        # plt.show()
-        # plt.imshow(phasem.real)
-        # plt.colorbar()
-        # plt.show()
-        # plt.imshow((vec@phasem).real)
-        # plt.colorbar()
-        # plt.show()
-        Aphased = A
 
-
-        Atotal += Aphased
-    # print(Atotal)
+        Atotal += np.conj(A_complex)
+        
+        print('---')
+    
     # END PHASE
 
     # BEGIN IFFT2
 
-    U = Atotal[0::2, :] - 1j * Atotal[1::2, :]  # U.shape = (257, 512)
     F = np.zeros((N512, N512), dtype=np.complex128)
-    # print('F\n', F)
-    F[:N257, :] = U
-    F[N257:, 0] = np.conj(U[1:N256])[::-1, 0]
-    F[N257:, 1:] = np.conj(U[1:N256])[::-1, :0:-1]
+    F[:N257, :] = Atotal
+    F[N257:, 0] = np.conj(Atotal[1:N256])[::-1, 0]
+    F[N257:, 1:] = np.conj(Atotal[1:N256])[::-1, :0:-1]
     data_rec = scipy.fft.ifft2(F)
-    f = np.zeros((N514, N512))
-    f[:N512] = data_rec.real
 
     # END IFFT2
     
     nx, ny = normalized_atlas[0].shape
     nx_large = nx*NSUB
     ny_large = ny*NSUB
-    combined_image = f[:nx_large, :ny_large]
+    combined_image = data_rec.real[:nx_large, :ny_large]
+
     return combined_image
