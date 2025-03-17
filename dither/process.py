@@ -3,10 +3,36 @@ import os, sys
 import numpy as np
 import scipy
 import copy
+from typing import Any
 
 
 
-def combine_image(normalized_atlas, centroids, wt, oversample=2):
+def combine_image(normalized_atlas, centroids, wt, oversample=2) -> np.ndarray[Any, np.dtype[np.float64]]:
+    """
+    Apply phase shifts to the input data.
+
+    Parameters
+    ----------
+    normalized_atlas : list-like container of arrays
+        Input 2D array TODO
+    centroids : list 
+        TODO
+    wt : int
+        TODO
+    oversample : int
+        TODO
+
+    Returns
+    -------
+    ndarray
+        TODO
+    """
+
+    # assertation
+
+    assert len(normalized_atlas)==len(centroids)
+    assert len(centroids)==len(wt)
+    assert all(im.size==normalized_atlas[0].size for im in normalized_atlas)
 
     # SOME GLOBAL FACTORS
 
@@ -165,7 +191,7 @@ def combine_image(normalized_atlas, centroids, wt, oversample=2):
 
         Atotal += np.conj(A_complex)
         
-        print('---')
+        # print('---')
     
     # END PHASE
 
