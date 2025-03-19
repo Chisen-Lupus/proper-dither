@@ -59,7 +59,7 @@ def combine_image(normalized_atlas, centroids, wt=None, oversample=2) -> np.ndar
         data = normalized_atlas[npos]
         data_large = np.zeros((NR_FREQ, NR_FREQ))
         data_large[:NX*NSUB:NSUB, :NY*NSUB:NSUB] = data
-        coef = np.zeros((NSUB**2), dtype=np.complex128)
+        coef = np.zeros((NSUB, NSUB), dtype=np.complex128)
         
         # LINE 247 - read offsets (totally different from the original code)
 
@@ -74,7 +74,6 @@ def combine_image(normalized_atlas, centroids, wt=None, oversample=2) -> np.ndar
         nsx = (NSUB - 1)//2 + 1 # 1
         isy = -((NSUB-1)//2) + 1 # 0, NOTE: added a bracket to regulate different handling of integer division
         isy = 0
-        isec = 0
 
         # BEGIN COEFFICIENT COMPUTATION
 
@@ -122,24 +121,23 @@ def combine_image(normalized_atlas, centroids, wt=None, oversample=2) -> np.ndar
                 # LINE 490 - For NSUB2 images, we are done
 
                 if NPP==NSUB**2:
-                    coef[isec] = vec[npos, 0]
+                    coef[iy, ix] = vec[npos, 0]
 
                 # LINE 495 - Otherwise, we need to do a little more work. Here we just solve for the fundamental image.
 
                 else: 
-                    coef[isec] = 0
+                    coef[iy, ix] = 0
                     for i in range(NSUB**2):
-                        coef[isec] += vec[i, 0]*np.conj(phases[i, npos])
+                        coef[iy, ix] += vec[i, 0]*np.conj(phases[i, npos])
 
                 # LINE 505 - Addin weighting factor
 
-                coef[isec] *= wt[npos]
+                coef[iy, ix] *= wt[npos]
 
                 # print(f'Image {npos}, power {coef[isec]*np.conj(coef[isec])}, sector {isec}')
                 # print(f'Image {npos}, power {coef[isec]}, sector {isec}')
 
-                isec += 1
-
+        print('---')
         # END COEFFICIENT COMPUTATION
 
         # LINE 516 - apply the complex scale factor to the transform
@@ -154,7 +152,6 @@ def combine_image(normalized_atlas, centroids, wt=None, oversample=2) -> np.ndar
 
         # BEGIN PHASE SHIFT APPLICATION
 
-        isec = 0
         isv = NR_FREQ//2
         iev = isv - NR_FREQ//NSUB + 1 
         for iy in range(isy, isy+nsy):
@@ -162,10 +159,14 @@ def combine_image(normalized_atlas, centroids, wt=None, oversample=2) -> np.ndar
             # print(ieu) # TODO: verify that ieu==NC_FREQ if nsx = 1
             isu = 0
             for ix in range(0, nsx):
-
+                # print('nsx', nsx)
+                # nu = NC_FREQ//NSUB
+                # print(NC_FREQ, NR_FREQ, nu)
+                # isu = ix*nu
+                # ieu = (ix+1)*nu
 
                 # Extract the complex coefficient
-                coef_complex = coef[isec]
+                coef_complex = coef[iy, ix]
 
                 # Compute the normalized row positions (V)
                 # Define rows
@@ -192,9 +193,8 @@ def combine_image(normalized_atlas, centroids, wt=None, oversample=2) -> np.ndar
 
                 # Apply the phase shift to A
                 A_complex[np.ix_(cols // 2, rows)] *= phase_shift
-                print('cols', (cols // 2)[[0, -1]], cols.shape, 'rows', rows[[0, -1]], rows.shape)
-                
-                isec += 1
+                print('cols', (cols // 2)[[0, -1]], cols.shape)
+                print('rows', rows[[0, -1]], rows.shape)
                 
                 isu = ieu + 1
                 ieu = NC_FREQ - (nsx - 2 - ix)*NC_FREQ//NSUB # TODO: check values
@@ -207,7 +207,7 @@ def combine_image(normalized_atlas, centroids, wt=None, oversample=2) -> np.ndar
 
         Atotal += np.conj(A_complex)
         
-        print('---')
+        print('------')
     
     # END PHASE SHIFT APPLICATION
 
