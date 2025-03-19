@@ -185,8 +185,7 @@ def combine_image(normalized_atlas, centroids, wt=None, oversample=2) -> np.ndar
     # END PHASE SHIFT APPLICATION
 
     # BEGIN IFFT2
-
-    F = np.zeros((NR_FREQ, NR_FREQ), dtype=np.complex128)
+    
     F[:NC_FREQ//2, :] = Atotal
     F[NC_FREQ//2:, 0] = np.conj(Atotal[1:NR_FREQ//2])[::-1, 0]
     F[NC_FREQ//2:, 1:] = np.conj(Atotal[1:NR_FREQ//2])[::-1, :0:-1]
