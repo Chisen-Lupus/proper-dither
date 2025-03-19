@@ -51,6 +51,7 @@ def combine_image(normalized_atlas, centroids, wt=None, oversample=2) -> np.ndar
     NR_FREQ = 2**N
 
     Atotal = np.zeros((NC_FREQ//2, NR_FREQ), dtype=np.complex128)
+    F = np.zeros((NR_FREQ, NR_FREQ), dtype=np.complex128)
 
     for npos in range(len(normalized_atlas)): 
 
@@ -72,13 +73,11 @@ def combine_image(normalized_atlas, centroids, wt=None, oversample=2) -> np.ndar
 
         nsy = NSUB # 2
         nsx = (NSUB - 1)//2 + 1 # 1
-        isy = -((NSUB-1)//2) + 1 # 0, NOTE: added a bracket to regulate different handling of integer division
-        isy = 0
 
         # BEGIN COEFFICIENT COMPUTATION
 
-        for iy in range(isy, isy+nsy): 
-            for ix in range(0, nsx): 
+        for iy in range(NSUB): 
+            for ix in range(NSUB): 
 
                 # LINE 304
 
@@ -138,6 +137,7 @@ def combine_image(normalized_atlas, centroids, wt=None, oversample=2) -> np.ndar
                 # print(f'Image {npos}, power {coef[isec]}, sector {isec}')
 
         print('---')
+        
         # END COEFFICIENT COMPUTATION
 
         # LINE 516 - apply the complex scale factor to the transform
@@ -147,6 +147,7 @@ def combine_image(normalized_atlas, centroids, wt=None, oversample=2) -> np.ndar
         A_hat = scipy.fft.fft2(data_large) # data_large must be (2^N, 2^N) for now
         A_unique = A_hat[:NC_FREQ//2, :]  # shape (NC_FREQ//2, NR_FREQ)
         A_complex = np.conj(A_unique)
+        # A_complex = np.conj(A_hat)
 
         # END FFT2
 
@@ -154,11 +155,11 @@ def combine_image(normalized_atlas, centroids, wt=None, oversample=2) -> np.ndar
 
         isv = NR_FREQ//2
         iev = isv - NR_FREQ//NSUB + 1 
-        for iy in range(isy, isy+nsy):
+        for iy in range(nsy):
             ieu = NC_FREQ - (NSUB - 1)*(nsx - 1)*NC_FREQ//NSUB
             # print(ieu) # TODO: verify that ieu==NC_FREQ if nsx = 1
             isu = 0
-            for ix in range(0, nsx):
+            for ix in range(nsx):
                 # print('nsx', nsx)
                 # nu = NC_FREQ//NSUB
                 # print(NC_FREQ, NR_FREQ, nu)
@@ -182,8 +183,8 @@ def combine_image(normalized_atlas, centroids, wt=None, oversample=2) -> np.ndar
 
                 # Compute the normalized column positions (U)
                 # cols = np.arange(isu, ieu + 1, 2)
-                cols = np.arange(isu, ieu, 2)
-                U = cols/(NC_FREQ - 2)/2
+                cols = np.arange(isu // 2, ieu // 2, 1)  # Now cols is already divided by 2
+                U = cols / (NC_FREQ - 2)   # Multiply back by 2 to match original scale
 
                 # Compute the column phase shift (as a complex exponential)
                 cphase = np.exp(-2j * phix[npos] * U)
@@ -192,8 +193,8 @@ def combine_image(normalized_atlas, centroids, wt=None, oversample=2) -> np.ndar
                 phase_shift = coef_complex * np.outer(cphase, rphase)
 
                 # Apply the phase shift to A
-                A_complex[np.ix_(cols // 2, rows)] *= phase_shift
-                print('cols', (cols // 2)[[0, -1]], cols.shape)
+                A_complex[np.ix_(cols, rows)] *= phase_shift  # No need for cols // 2
+                print('cols', cols[[0, -1]], cols.shape)
                 print('rows', rows[[0, -1]], rows.shape)
                 
                 isu = ieu + 1
@@ -202,10 +203,11 @@ def combine_image(normalized_atlas, centroids, wt=None, oversample=2) -> np.ndar
                 
             isv = iev - 1
             iev = isv - NR_FREQ//NSUB + 1 # TODO: check values
-            if iy==(isy + nsy - 2): 
+            if iy==(nsy - 2): 
                 iev = -(NR_FREQ//2) + 1 # NOTE: add a bracket to change negative sign to minus sign
 
         Atotal += np.conj(A_complex)
+        # F += np.conj(A_complex)
         
         print('------')
     
