@@ -153,18 +153,24 @@ def combine_image(normalized_atlas, centroids, wt=None, oversample=2) -> np.ndar
 
         # BEGIN PHASE SHIFT APPLICATION
 
-        isv = NR_FREQ//2
-        iev = isv - NR_FREQ//NSUB + 1 
+        # isv = NR_FREQ//2
+        # iev = isv - NR_FREQ//NSUB + 1 
         for iy in range(nsy):
-            ieu = NC_FREQ - (NSUB - 1)*(nsx - 1)*NC_FREQ//NSUB
-            # print(ieu) # TODO: verify that ieu==NC_FREQ if nsx = 1
-            isu = 0
-            for ix in range(nsx):
+            # ieu = NC_FREQ - (NSUB - 1)*(nsx - 1)*NC_FREQ//NSUB
+            # # print(ieu) # TODO: verify that ieu==NC_FREQ if nsx = 1
+            # isu = 0
+            for ix in range(nsy):
                 # print('nsx', nsx)
-                # nu = NC_FREQ//NSUB
+                nu = NC_FREQ//NSUB
                 # print(NC_FREQ, NR_FREQ, nu)
-                # isu = ix*nu
-                # ieu = (ix+1)*nu
+                isu = min(ix*nu, NC_FREQ//2)
+                ieu = min((ix+1)*nu, NC_FREQ//2)
+                if isu==ieu: 
+                    break
+
+                nv = NR_FREQ//NSUB
+                isv = NR_FREQ//2 - nv*iy
+                iev = NR_FREQ//2 - nv*(iy+1) if iy<NSUB-1 else NR_FREQ//2 - NR_FREQ
 
                 # Extract the complex coefficient
                 coef_complex = coef[iy, ix]
@@ -173,7 +179,8 @@ def combine_image(normalized_atlas, centroids, wt=None, oversample=2) -> np.ndar
                 # Define rows
                 print('ix', ix, 'iy', iy)
                 print('isu', isu, 'ieu', ieu, 'isv', isv, 'iev', iev)
-                rows = np.arange(isv - 1, iev - 2, -1)  
+                # rows = np.arange(isv - 1, iev - 2, -1)  
+                rows = np.arange(isv-1, iev-1, -1)
                 # rows = np.where(rows >= 0, rows, NR_FREQ + rows) # numpy array can take negative index
                 V = np.where(rows >= NR_FREQ // 2, (rows - NR_FREQ) / NR_FREQ, rows / NR_FREQ)
                 # print(V)
@@ -183,7 +190,7 @@ def combine_image(normalized_atlas, centroids, wt=None, oversample=2) -> np.ndar
 
                 # Compute the normalized column positions (U)
                 # cols = np.arange(isu, ieu + 1, 2)
-                cols = np.arange(isu // 2, ieu // 2, 1)  # Now cols is already divided by 2
+                cols = np.arange(isu, ieu)
                 U = cols / (NC_FREQ - 2)   # Multiply back by 2 to match original scale
 
                 # Compute the column phase shift (as a complex exponential)
@@ -193,18 +200,19 @@ def combine_image(normalized_atlas, centroids, wt=None, oversample=2) -> np.ndar
                 phase_shift = coef_complex * np.outer(cphase, rphase)
 
                 # Apply the phase shift to A
-                A_complex[np.ix_(cols, rows)] *= phase_shift  # No need for cols // 2
+                # print(U, V)
                 print('cols', cols[[0, -1]], cols.shape)
                 print('rows', rows[[0, -1]], rows.shape)
+                A_complex[np.ix_(cols, rows)] *= phase_shift  # No need for cols // 2
                 
-                isu = ieu + 1
-                ieu = NC_FREQ - (nsx - 2 - ix)*NC_FREQ//NSUB # TODO: check values
+                # isu = ieu + 1
+                # ieu = NC_FREQ - (nsx - 2 - ix)*NC_FREQ//NSUB # TODO: check values
                 # print(isu, ieu)
                 
-            isv = iev - 1
-            iev = isv - NR_FREQ//NSUB + 1 # TODO: check values
-            if iy==(nsy - 2): 
-                iev = -(NR_FREQ//2) + 1 # NOTE: add a bracket to change negative sign to minus sign
+            # isv = iev - 1
+            # iev = isv - NR_FREQ//NSUB + 1 # TODO: check values
+            # if iy==(nsy - 2): 
+            #     iev = -(NR_FREQ//2) + 1 # NOTE: add a bracket to change negative sign to minus sign
 
         Atotal += np.conj(A_complex)
         # F += np.conj(A_complex)
