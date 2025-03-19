@@ -55,31 +55,21 @@ def combine_image(normalized_atlas, centroids, wt=None, oversample=2) -> np.ndar
 
     for npos in range(len(normalized_atlas)): 
 
-        # BEGIN PHASE
-
         data = normalized_atlas[npos]
         data_large = np.zeros((NR_FREQ, NR_FREQ))
         data_large[:NX*NSUB:NSUB, :NY*NSUB:NSUB] = data
         coef = np.zeros((NSUB, NSUB), dtype=np.complex128)
-        
-        # LINE 247 - read offsets (totally different from the original code)
 
         dx = centroids[:, 1]
         dy = centroids[:, 0]
         phix = NSUB*np.pi*dx
         phiy = NSUB*np.pi*dy
 
-        # LINE 289 - Calculate the coefficients for each image. 
-
-        nsy = NSUB # 2
-        nsx = (NSUB - 1)//2 + 1 # 1
-
         # BEGIN COEFFICIENT COMPUTATION
 
+        # NOTE: Only half of the coefficients calculated here are used for now.
         for iy in range(NSUB): 
             for ix in range(NSUB): 
-
-                # LINE 304
 
                 # Precompute normalized phase shifts
                 px = -2 * phix / NSUB
@@ -106,10 +96,7 @@ def combine_image(normalized_atlas, centroids, wt=None, oversample=2) -> np.ndar
                 nfund = NSUB * nvin - nuin
                 phases[[0, nfund], :] = phases[[nfund, 0], :]
 
-                # LINE 355 - This loads an identity matrix, which will be used to invert the phase matrix.
-
-                # LINE 371 - The weighting factor is used at this point.
-
+                # Add weighting factor
                 if NPP>NSUB**2: 
                     phasem = phases @ np.diag(wt) @ np.conj(phases).T
                 else: 
@@ -117,33 +104,27 @@ def combine_image(normalized_atlas, centroids, wt=None, oversample=2) -> np.ndar
 
                 vec = np.linalg.inv(phasem)
 
-                # LINE 490 - For NSUB2 images, we are done
-
+                # For NSUB2 images, we are done
                 if NPP==NSUB**2:
                     coef[iy, ix] = vec[npos, 0]
-
-                # LINE 495 - Otherwise, we need to do a little more work. Here we just solve for the fundamental image.
-
+                # Otherwise, we need to do a little more work. Here we just solve for the fundamental image.
                 else: 
                     coef[iy, ix] = 0
                     for i in range(NSUB**2):
                         coef[iy, ix] += vec[i, 0]*np.conj(phases[i, npos])
 
-                # LINE 505 - Addin weighting factor
-
+                # Add weighting factor
                 coef[iy, ix] *= wt[npos]
 
                 # print(f'Image {npos}, power {coef[isec]*np.conj(coef[isec])}, sector {isec}')
-                # print(f'Image {npos}, power {coef[isec]}, sector {isec}')
 
-        print('---')
-        
+        # print('---')
+
         # END COEFFICIENT COMPUTATION
 
-        # LINE 516 - apply the complex scale factor to the transform
-        
         # BEGIN FFT2
 
+        # We only need half of the transformed array since we are doing real transform
         A_hat = scipy.fft.fft2(data_large) # data_large must be (2^N, 2^N) for now
         A_unique = A_hat[:NC_FREQ//2, :]  # shape (NC_FREQ//2, NR_FREQ)
         A_complex = np.conj(A_unique)
@@ -153,18 +134,13 @@ def combine_image(normalized_atlas, centroids, wt=None, oversample=2) -> np.ndar
 
         # BEGIN PHASE SHIFT APPLICATION
 
-        # isv = NR_FREQ//2
-        # iev = isv - NR_FREQ//NSUB + 1 
-        for iy in range(nsy):
-            # ieu = NC_FREQ - (NSUB - 1)*(nsx - 1)*NC_FREQ//NSUB
-            # # print(ieu) # TODO: verify that ieu==NC_FREQ if nsx = 1
-            # isu = 0
-            for ix in range(nsy):
-                # print('nsx', nsx)
+        for iy in range(NSUB):
+            for ix in range(NSUB):
+
+                # Starting and ending points of this sector
                 nu = NC_FREQ//NSUB
-                # print(NC_FREQ, NR_FREQ, nu)
-                isu = min(ix*nu, NC_FREQ//2)
-                ieu = min((ix+1)*nu, NC_FREQ//2)
+                isu = min(nu*ix, NC_FREQ//2)
+                ieu = min(nu*(ix+1), NC_FREQ//2)
                 if isu==ieu: 
                     break
 
@@ -176,20 +152,16 @@ def combine_image(normalized_atlas, centroids, wt=None, oversample=2) -> np.ndar
                 coef_complex = coef[iy, ix]
 
                 # Compute the normalized row positions (V)
-                # Define rows
-                print('ix', ix, 'iy', iy)
-                print('isu', isu, 'ieu', ieu, 'isv', isv, 'iev', iev)
-                # rows = np.arange(isv - 1, iev - 2, -1)  
+                # print('ix', ix, 'iy', iy)
+                # print('isu', isu, 'ieu', ieu, 'isv', isv, 'iev', iev)
                 rows = np.arange(isv-1, iev-1, -1)
                 # rows = np.where(rows >= 0, rows, NR_FREQ + rows) # numpy array can take negative index
                 V = np.where(rows >= NR_FREQ // 2, (rows - NR_FREQ) / NR_FREQ, rows / NR_FREQ)
-                # print(V)
 
                 # Compute the row phase shift (as a complex exponential)
                 rphase = np.exp(-2j * phiy[npos] * V)
 
                 # Compute the normalized column positions (U)
-                # cols = np.arange(isu, ieu + 1, 2)
                 cols = np.arange(isu, ieu)
                 U = cols / (NC_FREQ - 2)   # Multiply back by 2 to match original scale
 
@@ -201,24 +173,15 @@ def combine_image(normalized_atlas, centroids, wt=None, oversample=2) -> np.ndar
 
                 # Apply the phase shift to A
                 # print(U, V)
-                print('cols', cols[[0, -1]], cols.shape)
-                print('rows', rows[[0, -1]], rows.shape)
+                # print('cols', cols[[0, -1]], cols.shape)
+                # print('rows', rows[[0, -1]], rows.shape)
                 A_complex[np.ix_(cols, rows)] *= phase_shift  # No need for cols // 2
-                
-                # isu = ieu + 1
-                # ieu = NC_FREQ - (nsx - 2 - ix)*NC_FREQ//NSUB # TODO: check values
-                # print(isu, ieu)
-                
-            # isv = iev - 1
-            # iev = isv - NR_FREQ//NSUB + 1 # TODO: check values
-            # if iy==(nsy - 2): 
-            #     iev = -(NR_FREQ//2) + 1 # NOTE: add a bracket to change negative sign to minus sign
 
         Atotal += np.conj(A_complex)
         # F += np.conj(A_complex)
-        
-        print('------')
-    
+
+        # print('------')
+
     # END PHASE SHIFT APPLICATION
 
     # BEGIN IFFT2
