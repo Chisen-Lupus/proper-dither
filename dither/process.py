@@ -38,6 +38,7 @@ def combine_image(normalized_atlas, centroids, wt=None, oversample=2) -> np.ndar
     assert len(normalized_atlas)==len(centroids)
     assert len(centroids)==len(wt)
     assert all(im.size==normalized_atlas[0].size for im in normalized_atlas)
+    assert len(set([normalized_atlas.shape for arr in arrays])) == 1
 
     # SOME GLOBAL FACTORS
 
