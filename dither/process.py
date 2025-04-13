@@ -3,11 +3,17 @@ import os, sys
 import numpy as np
 import scipy
 import copy
-from typing import Any
+from typing import Callable, Any, Tuple, List, Optional
+from numpy.typing import NDArray
+import finufft
 
 
-
-def combine_image(normalized_atlas, centroids, wt=None, oversample=2) -> np.ndarray[Any, np.dtype[np.float64]]:
+def combine_image(
+    normalized_atlas: List[NDArray[np.float64]], 
+    centroids: List[Tuple[float, float]], 
+    wts: Optional[List[float]] = None, 
+    oversample: int = 2
+) -> NDArray[np.float64]:
     """
     Apply phase shifts to the input data.
 
@@ -17,7 +23,7 @@ def combine_image(normalized_atlas, centroids, wt=None, oversample=2) -> np.ndar
         Input 2D array TODO
     centroids : list 
         TODO
-    wt : int
+    wts : int
         TODO
     oversample : int
         TODO
@@ -28,17 +34,17 @@ def combine_image(normalized_atlas, centroids, wt=None, oversample=2) -> np.ndar
         TODO
     """
 
-    # GENERATE POSSIBLY MISSING INPUT
+    # REGULARIZE INPUT
 
-    if wt is None:
-        wt = np.ones(len(normalized_atlas))
+    centroids = np.array(centroids)
+    if wts is None:
+        wts = np.ones(len(normalized_atlas))
 
     # ASSERTATION
 
     assert len(normalized_atlas)==len(centroids)
-    assert len(centroids)==len(wt)
-    assert all(im.size==normalized_atlas[0].size for im in normalized_atlas)
-    assert len(set([normalized_atlas.shape for arr in arrays])) == 1
+    assert len(centroids)==len(wts)
+    assert len(set([im.shape for im in normalized_atlas]))==1
 
     # SOME GLOBAL FACTORS
 
@@ -47,17 +53,17 @@ def combine_image(normalized_atlas, centroids, wt=None, oversample=2) -> np.ndar
     NX, NY = normalized_atlas[0].shape
     NX_LARGE = NX*NSUB
     NY_LARGE = NY*NSUB
-    N =int(np.ceil(np.log2(np.max([NX_LARGE, NY_LARGE]))))
-    NC_FREQ = 2**N + 2
-    NR_FREQ = 2**N
+    NC_FREQ = scipy.fft.next_fast_len(NX_LARGE) + 2
+    NR_FREQ = 2**int(np.ceil(np.log2(NY_LARGE)))
+    next_fast_len
 
     Atotal = np.zeros((NC_FREQ//2, NR_FREQ), dtype=np.complex128)
-    F = np.zeros((NR_FREQ, NR_FREQ), dtype=np.complex128)
+    F = np.zeros((NC_FREQ, NR_FREQ), dtype=np.complex128)
 
     for npos in range(len(normalized_atlas)): 
 
         data = normalized_atlas[npos]
-        data_large = np.zeros((NR_FREQ, NR_FREQ))
+        data_large = np.zeros((NC_FREQ, NR_FREQ))
         data_large[:NX*NSUB:NSUB, :NY*NSUB:NSUB] = data
         coef = np.zeros((NSUB, NSUB), dtype=np.complex128)
 
@@ -99,7 +105,7 @@ def combine_image(normalized_atlas, centroids, wt=None, oversample=2) -> np.ndar
 
                 # Add weighting factor
                 if NPP>NSUB**2: 
-                    phasem = phases @ np.diag(wt) @ np.conj(phases).T
+                    phasem = phases @ np.diag(wts) @ np.conj(phases).T
                 else: 
                     phasem = phases
 
@@ -115,7 +121,7 @@ def combine_image(normalized_atlas, centroids, wt=None, oversample=2) -> np.ndar
                         coef[iy, ix] += vec[i, 0]*np.conj(phases[i, npos])
 
                 # Add weighting factor
-                coef[iy, ix] *= wt[npos]
+                coef[iy, ix] *= wts[npos]
 
                 # print(f'Image {npos}, power {coef[isec]*np.conj(coef[isec])}, sector {isec}')
 
@@ -188,8 +194,8 @@ def combine_image(normalized_atlas, centroids, wt=None, oversample=2) -> np.ndar
     # BEGIN IFFT2
     
     F[:NC_FREQ//2, :] = Atotal
-    F[NC_FREQ//2:, 0] = np.conj(Atotal[1:NR_FREQ//2])[::-1, 0]
-    F[NC_FREQ//2:, 1:] = np.conj(Atotal[1:NR_FREQ//2])[::-1, :0:-1]
+    F[NC_FREQ//2+1:, 0] = np.conj(Atotal[1:NC_FREQ//2])[::-1, 0]
+    F[NC_FREQ//2+1:, 1:] = np.conj(Atotal[1:NC_FREQ//2])[::-1, :0:-1]
     data_rec = scipy.fft.ifft2(F)
     data_real = data_rec.real
 
