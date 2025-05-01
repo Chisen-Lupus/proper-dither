@@ -54,8 +54,7 @@ def combine_image(
     NX_LARGE = NX*NSUB
     NY_LARGE = NY*NSUB
     NC_FREQ = scipy.fft.next_fast_len(NX_LARGE) + 2
-    NR_FREQ = 2**int(np.ceil(np.log2(NY_LARGE)))
-    next_fast_len
+    NR_FREQ = scipy.fft.next_fast_len(NY_LARGE) + 2
 
     Atotal = np.zeros((NC_FREQ//2, NR_FREQ), dtype=np.complex128)
     F = np.zeros((NC_FREQ, NR_FREQ), dtype=np.complex128)
