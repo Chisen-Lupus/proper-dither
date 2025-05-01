@@ -46,16 +46,25 @@ from astropy.convolution import convolve, Box2DKernel
 from astropy.coordinates import SkyCoord
 from astropy.wcs import WCS
 from astropy.modeling.models import Shift
+from astropy.modeling import models
 import astropy.units as u
 
 from scipy.ndimage import label, zoom, gaussian_filter, shift
+from scipy.optimize import minimize
+from scipy.signal import convolve2d
 
 from photutils.detection import DAOStarFinder
 from photutils.centroids import centroid_com
 
 from jwst.datamodels import ImageModel
 
+from webbpsf import NIRCam
+
+from typing import Any
+
 import gwcs
+
+from .process import combine_image
 
 # TODO: naming convention of the functions
 # TODO: delete comments and add documentations
@@ -134,8 +143,8 @@ def get_pixel_center_from_array(data):
         Center x and y pixel coordinates.
     """
     nx, ny = data.shape
-    center_x = nx//2 + 1
-    center_y = ny//2 + 1
+    center_x = (nx - 1) // 2  # left center for even, center for odd
+    center_y = (ny - 1) // 2
     return center_x, center_y
 
 def get_power_spectrum_from_realfft2d(Atotal):
@@ -306,7 +315,7 @@ def get_brightest_pixel(data, xmin=None, xmax=None, ymin=None, ymax=None):
     if not xmax: xmax=data.shape[0]
     if not ymax: ymax=data.shape[1]
     data_slice = data[xmin:xmax, ymin:ymax]
-    x, y = np.where(data_slice==np.max(data_slice))
+    x, y = np.where(data_slice==np.nanmax(data_slice))
     return [x[0]+xmin, y[0]+ymin]
 
 def calculate_padding_radius(centroids_int):
@@ -628,3 +637,149 @@ def shift_with_nan_handling(array, shift_values, order=3):
     shifted_array[shifted_mask] = np.nan
 
     return shifted_array
+
+
+def save_JWST_fits(dither_path, combined_image, combined_err=None, 
+                   cutout_path_base=None, base_crop_dx=None, base_crop_dy=None, 
+                   center_coord=None, REFINE_WCS=False) -> None:
+
+    cx, cy = get_pixel_center_from_array(combined_image)
+    
+    with ImageModel(cutout_path_base) as model_base:
+        model_dither = ImageModel() 
+        model_dither.meta = model_base.meta
+        if cutout_path_base is not None:
+            # prepare GWCS change
+            original_wcs = model_base.meta.wcs
+            detector_frame = original_wcs.input_frame  
+            sky_frame = original_wcs.output_frame  
+            forward_transform = original_wcs.forward_transform  
+            scale_transform = models.Scale(0.5) & models.Scale(0.5) 
+            crop_transform = models.Shift(base_crop_dx) & models.Shift(base_crop_dy)
+            new_forward_transform = scale_transform | crop_transform | forward_transform
+            dither_wcs = gwcs.WCS(forward_transform=new_forward_transform,
+                            input_frame=detector_frame,
+                            output_frame=sky_frame)
+            if REFINE_WCS: 
+                agn_x, agn_y = dither_wcs.world_to_pixel(center_coord)
+                refine_x = agn_x - cx
+                refine_y = agn_y - cy
+                refine_transform = models.Shift(refine_x, name='refine x') & \
+                                models.Shift(refine_y, name='refine y') 
+                updated_transform = refine_transform | new_forward_transform
+                dither_wcs = gwcs.WCS(forward_transform=updated_transform,
+                                    input_frame=detector_frame,
+                                    output_frame=sky_frame)
+            model_dither.meta.wcs = dither_wcs  # Assign updated GWCS
+            # prepare WCS change
+            model_dither.meta.wcsinfo.crpix1 -= base_crop_dx
+            model_dither.meta.wcsinfo.crpix2 -= base_crop_dy
+            # print(base_crop_dx, base_crop_dy)
+            model_dither.meta.wcsinfo.crpix1 = (model_dither.meta.wcsinfo.crpix1 - 0.5) * 2 + 0.5
+            model_dither.meta.wcsinfo.crpix2 = (model_dither.meta.wcsinfo.crpix2 - 0.5) * 2 + 0.5
+            model_dither.meta.wcsinfo.cd1_1 /= 2  # Scale X transformation
+            model_dither.meta.wcsinfo.cd1_2 /= 2  # Scale Y transformation
+            model_dither.meta.wcsinfo.cd2_1 /= 2
+            model_dither.meta.wcsinfo.cd2_2 /= 2
+            if REFINE_WCS: 
+                model_dither.meta.wcsinfo.crpix1 = cx + 0.5
+                model_dither.meta.wcsinfo.crpix2 = cy + 0.5
+                model_dither.meta.wcsinfo.crval1 = center_coord.ra.deg
+                model_dither.meta.wcsinfo.crval2 = center_coord.dec.deg
+            # transfer exposure time
+        else: 
+            pass # TODO: add wcs construction from 0
+        # model_dither.meta.exposure.exposure_time*=9 # assuming a same exposure time
+        # transfer data and save
+        model_dither.data = combined_image
+        model_dither.err = combined_err
+        model_dither.save(dither_path, overwrite=True)
+    print(f"Coadded image saved to {dither_path}")
+
+
+
+# shift optimization
+
+def compute_power_spectrum(image):
+    f_image = np.fft.fft2(image)
+    power_spectrum = np.abs(np.fft.fftshift(f_image))**2
+    return power_spectrum
+
+def sum_outer_power_spectrum(image, mask=None, threshold=90):
+    if mask is None:
+        h, w = image.shape
+        y, x = np.ogrid[:h, :w]
+        center_y, center_x = h // 2, w // 2
+        r = np.sqrt((x - center_x)**2 + (y - center_y)**2)
+        mask = r > threshold
+        return np.sum(image[mask])
+    else: 
+        return np.sum(image[mask])
+
+def loss_function(params, images, wt, mask, oversample_factor):
+    n = len(images)
+    shifts = params.reshape((n, 2))
+    combined_image = combine_image(images, shifts, wt, oversample=oversample_factor)
+    power_spectrum = compute_power_spectrum(combined_image)
+    return sum_outer_power_spectrum(power_spectrum, mask=mask)
+
+def optimize_shifts(images, initial_shifts, wt, mask, oversample_factor=2):
+    fixed_shift = initial_shifts[0]  # Keep this fixed
+    initial_params = np.array(initial_shifts[1:]).flatten()  # Optimize only the remaining shifts
+
+    def loss_function_wrapper(params, *args):
+        # Reconstruct full shifts with the fixed first one
+        full_params = np.insert(params.reshape(-1, 2), 0, fixed_shift, axis=0)
+        return loss_function(full_params.flatten(), *args)  # Ensure proper input format
+    
+    # def callback_function(params):
+    #     print(f"Current loss: {loss_function_wrapper(params, images, wt, mask, oversample_factor)}")
+
+    result = minimize(
+        loss_function_wrapper,
+        initial_params,
+        args=(images, wt, mask, oversample_factor),
+        method='L-BFGS-B',
+        # method='Powell',
+        # callback=callback_function,  # Add callback for monitoring progress
+        options={
+            'maxiter': 500,
+            'disp': True,
+            # 'gtol': 1e-8,
+            'ftol': 1e-12,
+            # 'eps': 1e-8,
+        }
+    )
+    # Reconstruct the full optimized shifts
+    optimized_shifts = np.insert(result.x.reshape(-1, 2), 0, fixed_shift, axis=0)
+    return optimized_shifts
+
+# end shift optimziation
+
+def create_jwst_band_limit_mask(filter, size, oversample=2) -> np.ndarray[Any, np.dtype[bool]]:
+    nircam = NIRCam()
+    nircam.filter = filter.upper()
+    app = 0.063 if nircam.channel=='long' else 0.031
+    if size%2==0: 
+        nircam.options['source_offset_x'] = -app/2/oversample
+        nircam.options['source_offset_y'] = -app/2/oversample
+    oversampled_psf = nircam.calc_psf(oversample=oversample, fov_pixels=size)[0].data
+    mask = compute_power_spectrum(oversampled_psf)<1e-7
+    return mask
+
+
+def iterative_nan_fill(array, kernel=None):
+    if kernel is None:
+        kernel = np.array([[0, 0.25, 0], 
+                           [0.25, 0, 0.25], 
+                           [0, 0.25, 0]])
+    filled_array = array.copy()
+    while np.isnan(filled_array).any():
+        num_neighbors = convolve2d(~np.isnan(filled_array), kernel, mode='same', boundary='symm')
+        neighbor_sum = convolve2d(np.nan_to_num(filled_array, nan=0), kernel, mode='same', boundary='symm')
+        mask = np.isnan(filled_array) & (num_neighbors > 0)
+        avg_neighbors = np.zeros_like(filled_array)
+        valid = num_neighbors > 0
+        avg_neighbors[valid] = neighbor_sum[valid] / num_neighbors[valid]
+        filled_array[mask] = avg_neighbors[mask]
+    return filled_array
