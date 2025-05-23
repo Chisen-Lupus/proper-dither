@@ -5,14 +5,14 @@ import scipy
 import copy
 from typing import Callable, Any, Tuple, List, Optional
 from numpy.typing import NDArray
-import finufft
 
 
 def combine_image(
     normalized_atlas: List[NDArray[np.float64]], 
     centroids: List[Tuple[float, float]], 
     wts: Optional[List[float]] = None, 
-    oversample: int = 2
+    oversample: int = 2, 
+    return_full_array = False
 ) -> NDArray[np.float64]:
     """
     Apply phase shifts to the input data.
@@ -53,8 +53,12 @@ def combine_image(
     NX, NY = normalized_atlas[0].shape
     NX_LARGE = NX*NSUB
     NY_LARGE = NY*NSUB
-    NC_FREQ = scipy.fft.next_fast_len(NX_LARGE) + 2
-    NR_FREQ = scipy.fft.next_fast_len(NY_LARGE) + 2
+    NC_FREQ = int(2**np.ceil(np.log2(NX_LARGE))) + 2 # find the next 2^N+2 e.g. 514
+    NR_FREQ = int(2**np.ceil(np.log2(NY_LARGE))) # 4x of NX_LARGE can effectlively dissipate the noise
+    # print(NC_FREQ, NR_FREQ)
+    # NC_FREQ = 1026
+    # NR_FREQ = 1024
+
 
     Atotal = np.zeros((NC_FREQ//2, NR_FREQ), dtype=np.complex128)
     F = np.zeros((NC_FREQ, NR_FREQ), dtype=np.complex128)
@@ -88,7 +92,7 @@ def combine_image(
                 pyi = -nvin * py
 
                 # Generate sub-grid indices
-                isatx, isaty = np.meshgrid(np.arange(NSUB), np.arange(NSUB))
+                isatx, isaty = np.meshgrid(np.arange(NSUB), np.arange(NSUB), indexing='xy')
                 isatx = isatx.flatten()
                 isaty = isaty.flatten()
 
@@ -103,10 +107,10 @@ def combine_image(
                 phases[[0, nfund], :] = phases[[nfund, 0], :]
 
                 # Add weighting factor
-                if NPP>NSUB**2: 
-                    phasem = phases @ np.diag(wts) @ np.conj(phases).T
-                else: 
+                if NPP==NSUB**2:
                     phasem = phases
+                else: 
+                    phasem = phases @ np.diag(wts) @ np.conj(phases).T
 
                 vec = np.linalg.inv(phasem)
 
@@ -119,8 +123,9 @@ def combine_image(
                     for i in range(NSUB**2):
                         coef[iy, ix] += vec[i, 0]*np.conj(phases[i, npos])
 
-                # Add weighting factor
-                coef[iy, ix] *= wts[npos]
+                    # XXX: Moving it to the else branch means totally ignore wts for NSUB**2 images
+                    # Add weighting factor
+                    coef[iy, ix] *= wts[npos]
 
                 # print(f'Image {npos}, power {coef[isec]*np.conj(coef[isec])}, sector {isec}')
 
@@ -143,12 +148,23 @@ def combine_image(
         for iy in range(NSUB):
             for ix in range(NSUB):
 
+                # process columns
+
                 # Starting and ending points of this sector
                 nu = NC_FREQ//NSUB
                 isu = min(nu*ix, NC_FREQ//2)
                 ieu = min(nu*(ix+1), NC_FREQ//2)
                 if isu==ieu: 
                     break
+
+                # Compute the normalized column positions (U)
+                cols = np.arange(isu, ieu)
+                U = cols / NC_FREQ  # Multiply back by 2 to match original scale
+
+                # Compute the column phase shift (as a complex exponential)
+                cphase = np.exp(-2j * phix[npos] * U)
+
+                # process rows
 
                 nv = NR_FREQ//NSUB
                 isv = NR_FREQ//2 - nv*iy
@@ -167,12 +183,7 @@ def combine_image(
                 # Compute the row phase shift (as a complex exponential)
                 rphase = np.exp(-2j * phiy[npos] * V)
 
-                # Compute the normalized column positions (U)
-                cols = np.arange(isu, ieu)
-                U = cols / (NC_FREQ - 2)   # Multiply back by 2 to match original scale
-
-                # Compute the column phase shift (as a complex exponential)
-                cphase = np.exp(-2j * phix[npos] * U)
+                # apply shift
 
                 # Compute the overall phase shift (outer product for broadcasting)
                 phase_shift = coef_complex * np.outer(cphase, rphase)
@@ -202,4 +213,7 @@ def combine_image(
 
     combined_image = data_real[:NX_LARGE, :NY_LARGE]
 
-    return combined_image
+    if return_full_array:
+        return data_real
+    else:
+        return combined_image
