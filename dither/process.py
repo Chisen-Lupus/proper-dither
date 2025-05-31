@@ -61,7 +61,6 @@ def combine_image(
 
 
     Atotal = np.zeros((NC_FREQ//2, NR_FREQ), dtype=np.complex128)
-    F = np.zeros((NC_FREQ, NR_FREQ), dtype=np.complex128)
 
     for npos in range(len(normalized_atlas)): 
 
@@ -203,6 +202,7 @@ def combine_image(
 
     # BEGIN IFFT2
     
+    F = np.zeros((NC_FREQ, NR_FREQ), dtype=np.complex128)
     F[:NC_FREQ//2, :] = Atotal
     F[NC_FREQ//2+1:, 0] = np.conj(Atotal[1:NC_FREQ//2])[::-1, 0]
     F[NC_FREQ//2+1:, 1:] = np.conj(Atotal[1:NC_FREQ//2])[::-1, :0:-1]
