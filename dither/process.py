@@ -12,7 +12,9 @@ def combine_image(
     centroids: List[Tuple[float, float]], 
     wts: Optional[List[float]] = None, 
     oversample: int = 2, 
-    return_full_array = False
+    # for tesing purpose:
+    return_full_array: bool = False, 
+    overpadding: int = 0
 ) -> NDArray[np.float64]:
     """
     Apply phase shifts to the input data.
@@ -53,14 +55,13 @@ def combine_image(
     NX, NY = normalized_atlas[0].shape
     NX_LARGE = NX*NSUB
     NY_LARGE = NY*NSUB
-    NC_FREQ = int(2**np.ceil(np.log2(NX_LARGE))) + 2 # find the next 2^N+2 e.g. 514
+    NC_FREQ = int(2**np.ceil(np.log2(NX_LARGE))) # find the next 2^N+2 e.g. 514
     NR_FREQ = int(2**np.ceil(np.log2(NY_LARGE))) # 4x of NX_LARGE can effectlively dissipate the noise
-    # print(NC_FREQ, NR_FREQ)
-    # NC_FREQ = 1026
-    # NR_FREQ = 1024
+    NC_FREQ *= 2**overpadding
+    NR_FREQ *= 2**overpadding
 
 
-    Atotal = np.zeros((NC_FREQ//2, NR_FREQ), dtype=np.complex128)
+    A_total = np.zeros((NC_FREQ//2+1, NR_FREQ), dtype=np.complex128)
 
     for npos in range(len(normalized_atlas)): 
 
@@ -135,10 +136,7 @@ def combine_image(
         # BEGIN FFT2
 
         # We only need half of the transformed array since we are doing real transform
-        A_hat = scipy.fft.fft2(data_large) # data_large must be (2^N, 2^N) for now
-        A_unique = A_hat[:NC_FREQ//2, :]  # shape (NC_FREQ//2, NR_FREQ)
-        A_complex = np.conj(A_unique)
-        # A_complex = np.conj(A_hat)
+        A_hat = np.conj(scipy.fft.rfft2(data_large, axes=(1, 0)))
 
         # END FFT2
 
@@ -151,8 +149,9 @@ def combine_image(
 
                 # Starting and ending points of this sector
                 nu = NC_FREQ//NSUB
-                isu = min(nu*ix, NC_FREQ//2)
-                ieu = min(nu*(ix+1), NC_FREQ//2)
+                isu = min(nu*ix, NC_FREQ//2+1)
+                ieu = min(nu*(ix+1), NC_FREQ//2+1)
+                print(isu, ieu)
                 if isu==ieu: 
                     break
 
@@ -165,7 +164,7 @@ def combine_image(
 
                 # process rows
 
-                nv = NR_FREQ//NSUB
+                nv = NR_FREQ//NSUB 
                 isv = NR_FREQ//2 - nv*iy
                 iev = NR_FREQ//2 - nv*(iy+1) if iy<NSUB-1 else NR_FREQ//2 - NR_FREQ
 
@@ -173,10 +172,7 @@ def combine_image(
                 coef_complex = coef[iy, ix]
 
                 # Compute the normalized row positions (V)
-                # print('ix', ix, 'iy', iy)
-                # print('isu', isu, 'ieu', ieu, 'isv', isv, 'iev', iev)
                 rows = np.arange(isv-1, iev-1, -1)
-                # rows = np.where(rows >= 0, rows, NR_FREQ + rows) # numpy array can take negative index
                 V = np.where(rows >= NR_FREQ // 2, (rows - NR_FREQ) / NR_FREQ, rows / NR_FREQ)
 
                 # Compute the row phase shift (as a complex exponential)
@@ -188,25 +184,15 @@ def combine_image(
                 phase_shift = coef_complex * np.outer(cphase, rphase)
 
                 # Apply the phase shift to A
-                # print(U, V)
-                # print('cols', cols[[0, -1]], cols.shape)
-                # print('rows', rows[[0, -1]], rows.shape)
-                A_complex[np.ix_(cols, rows)] *= phase_shift  # No need for cols // 2
+                A_hat[np.ix_(cols, rows)] *= phase_shift  # No need for cols // 2
 
-        Atotal += np.conj(A_complex)
-        # F += np.conj(A_complex)
-
-        # print('------')
+        A_total += A_hat
 
     # END PHASE SHIFT APPLICATION
 
     # BEGIN IFFT2
     
-    F = np.zeros((NC_FREQ, NR_FREQ), dtype=np.complex128)
-    F[:NC_FREQ//2, :] = Atotal
-    F[NC_FREQ//2+1:, 0] = np.conj(Atotal[1:NC_FREQ//2])[::-1, 0]
-    F[NC_FREQ//2+1:, 1:] = np.conj(Atotal[1:NC_FREQ//2])[::-1, :0:-1]
-    data_rec = scipy.fft.ifft2(F)
+    data_rec = scipy.fft.irfft2(np.conj(A_total), s=(NC_FREQ, NR_FREQ), axes=(1, 0))
     data_real = data_rec.real
 
     # END IFFT2
