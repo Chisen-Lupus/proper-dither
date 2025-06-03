@@ -6,6 +6,7 @@ import copy
 from typing import Callable, Any, Tuple, List, Optional
 from numpy.typing import NDArray
 
+import matplotlib.pyplot as plt
 
 def combine_image(
     normalized_atlas: List[NDArray[np.float64]], 
@@ -151,7 +152,6 @@ def combine_image(
                 nu = NC_FREQ//NSUB
                 isu = min(nu*ix, NC_FREQ//2+1)
                 ieu = min(nu*(ix+1), NC_FREQ//2+1)
-                print(isu, ieu)
                 if isu==ieu: 
                     break
 
